@@ -50,7 +50,7 @@ columns_order = [
 df = df[columns_order]
 
 # Load existing data from CSV
-df_existing = pd.read_csv('music_chart_model/spotify_chart_data.csv')
+df_existing = pd.read_csv('music_chart_model/cleaned_data/combined_file.csv')
 
 # Convert 'DATE' in df_existing to datetime, ensuring it matches the format in df
 # This conversion should happen before attempting to access or manipulate the 'DATE' column
@@ -66,5 +66,6 @@ df['DATE'] = pd.to_datetime(df['DATE'])
 df_combined = pd.concat([df_existing, df], ignore_index=True).drop_duplicates(subset=['DATE', 'ARTIST_TITLE'])
 
 # Save the combined DataFrame back to CSV
-df_combined.to_csv('spotify_chart_data.csv', index=False)
+df_combined.to_csv('music_chart_model/cleaned_data/combined_file.csv', index=False)
 print('CSV file has been updated')
+
