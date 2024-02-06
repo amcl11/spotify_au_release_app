@@ -50,7 +50,7 @@ columns_order = [
 df = df[columns_order]
 
 # Load existing data from CSV
-df_existing = pd.read_csv('cleaned_data/kworb.csv')
+df_existing = pd.read_csv('music_chart_model/spotify_chart_data.csv')
 
 # Convert 'DATE' in df_existing to datetime, ensuring it matches the format in df
 # This conversion should happen before attempting to access or manipulate the 'DATE' column
