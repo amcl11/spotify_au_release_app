@@ -1,4 +1,4 @@
-# music_chart_model
+# spotify_chart_model
 
 #### Building a Spotify AU Top 200 dataset
 
