@@ -28,3 +28,4 @@ def get_tracks_positions_in_playlists(client_id, client_secret, redirect_uri, pl
             results = sp.next(results) if results['next'] else None
 
     return track_positions
+
