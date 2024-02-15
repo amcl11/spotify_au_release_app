@@ -32,10 +32,16 @@ def fetch_playlist_tracks(sp, playlist_id):
 
 def get_tracks_positions_in_playlists(sp, playlists_dict, track_ids):
     track_positions = {}
-    
+    playlist_follower_counts = {}  # Dictionary to store follower counts
+
+    # Fetch the follower counts for all playlists first
+    for playlist_name, playlist_id in playlists_dict.items():
+        playlist = sp.playlist(playlist_id)
+        playlist_follower_counts[playlist_name] = playlist['followers']['total']
+
     for track_id in track_ids:
         # Initialize an empty dict for each track_id
-        track_positions[track_id] = {'positions': {}, 'artists': '', 'title': ''}
+        track_positions[track_id] = {'positions': {}, 'artists': '', 'title': '', 'followers': {}}
         
         # Fetch track details (artist names and song title)
         track_details = sp.track(track_id)
@@ -58,6 +64,8 @@ def get_tracks_positions_in_playlists(sp, playlists_dict, track_ids):
                     if playlist_name not in track_positions[track_id]['positions']:
                         track_positions[track_id]['positions'][playlist_name] = []
                     track_positions[track_id]['positions'][playlist_name].append(position)
+                    # Store the follower count for the playlist alongside positions
+                    track_positions[track_id]['followers'][playlist_name] = playlist_follower_counts[playlist_name]
                 position += 1
             results = sp.next(results) if results['next'] else None
 

@@ -18,21 +18,49 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
+# # Function to display the table for a selected artist/track
+# def display_table_for_selection(track_positions, selection):
+#     # Find the artist/track in the data
+#     for track_id, details in track_positions.items():
+#         artist_track = f"{details['artists']} - {details['title']}"
+#         if artist_track == selection:
+#             # Prepare the table data
+#             playlist_info = details['positions']
+#             follower_info = details['followers']
+#             table_data = {
+#                 'Playlist': list(playlist_info.keys()),
+#                 'Position': [', '.join(str(pos + 1) for pos in positions) for positions in playlist_info.values()],
+#                 'Playlist Followers': [follower_info[playlist] for playlist in playlist_info.keys()]
+#             }
+#             df = pd.DataFrame(table_data)
+#             st.table(df)
+#             break
+
 # Function to display the table for a selected artist/track
 def display_table_for_selection(track_positions, selection):
     # Find the artist/track in the data
     for track_id, details in track_positions.items():
         artist_track = f"{details['artists']} - {details['title']}"
         if artist_track == selection:
+            # Combine playlist names and follower counts
+            combined_info = [(playlist, positions, details['followers'][playlist])
+                             for playlist, positions in details['positions'].items()]
+            
+            # Sort by follower count in descending order
+            sorted_info = sorted(combined_info, key=lambda x: x[2], reverse=True)
+            
             # Prepare the table data
-            playlist_info = details['positions']
             table_data = {
-                'Playlist': list(playlist_info.keys()),
-                'Position': [', '.join(str(pos + 1) for pos in positions) for positions in playlist_info.values()]
+                'Playlist': [info[0] for info in sorted_info],
+                'Position': [', '.join(str(pos + 1) for pos in info[1]) for info in sorted_info],
+                'Playlist Followers': [f"{info[2]:,}" for info in sorted_info]  # Format the numbers with commas
             }
+            
+            # Create and display the DataFrame
             df = pd.DataFrame(table_data)
             st.table(df)
             break
+
 
 # Load playlist data and prepare selections
 playlists_dict = st.session_state.get('playlists_dict')
@@ -51,3 +79,4 @@ selected_artist_track = st.selectbox('Select a New Release:', selections)
 # Display the table for the selected artist/track
 if selected_artist_track:
     display_table_for_selection(track_positions, selected_artist_track)
+
