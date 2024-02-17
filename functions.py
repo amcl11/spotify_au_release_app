@@ -1,7 +1,9 @@
 import pandas as pd
+import numpy as np
 import streamlit as st
 import spotipy
 import logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
