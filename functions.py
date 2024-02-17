@@ -127,7 +127,7 @@ def fetch_and_display_playlist_info(sp, playlists_dict, playlist_id):
     # Prepare data for DataFrame creation
     data_for_df = []
     for track_id, details in track_positions.items():
-        row = {playlist: '' for playlist in playlists_dict.keys()}  # Initialize row with empty strings for each playlist
+        row = {playlist: np.nan for playlist in playlists_dict.keys()}  # Initialize row with np.nan for each playlist
         row['Artist'] = details['artists']
         row['Track'] = details['title']
         
