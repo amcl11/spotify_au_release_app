@@ -91,28 +91,52 @@ def get_tracks_positions_in_playlists(sp, playlists_dict, track_ids):
 
 
 def fetch_and_display_playlist_info(sp, playlists_dict, playlist_id):
+    """
+    Fetches and displays information about tracks in a specific playlist and their positions in various playlists.
+
+    This function performs multiple steps to gather and prepare data for display:
+    1. Fetch playlist tracks: It calls a custom function `fetch_playlist_tracks` to retrieve track IDs, artist names, track names, and followers count for the specified playlist ID. This function is expected to communicate with the Spotify API and return the relevant data.
+
+    2. Get track positions in playlists: Using another custom function `get_tracks_positions_in_playlists`, it obtains the positions of the fetched tracks across multiple playlists defined in `playlists_dict`. This involves querying the Spotify API for each track to see in which playlists they appear and at what positions.
+
+    3. Prepare data for DataFrame creation: It then prepares the data for displaying by creating a list of dictionaries. Each dictionary corresponds to a track, containing the track's artist name, track title, and its position(s) in each playlist. For playlists where the track does not appear, empty strings are assigned as values. This step ensures that each track's data is structured in a way that can be easily converted into a pandas DataFrame.
+
+        - For each track found in the `track_positions`, a new row is initialized with empty strings for each playlist (to handle tracks not appearing in some playlists).
+        - The artist's name and track title are added to the row.
+        - The track's position in each playlist (if any) is also added. Positions are adjusted to account for the zero-based indexing used by pandas (hence the `pos + 1` operation), and multiple positions are joined into a single string separated by commas.
+
+    4. Convert list of dictionaries to DataFrame: Finally, the prepared list of dictionaries is converted into a pandas DataFrame. The DataFrame is structured with 'Artist' and 'Track' as the first two columns, followed by columns for each playlist. This DataFrame is suitable for displaying the gathered information in a tabular format, showing where and at what position each track appears across the specified playlists.
+
+    Parameters:
+    - sp: A Spotify client instance, used to communicate with the Spotify API.
+    - playlists_dict: A dictionary mapping playlist names to their Spotify IDs. This is used to identify which playlists to check for track positions.
+    - playlist_id: The Spotify ID of the playlist for which track information is being fetched.
+
+    Returns:
+    - df: A pandas DataFrame containing the fetched track information and their positions across multiple playlists.
+    """
+    
     # Fetch playlist tracks
     track_ids, artist_names, track_names, followers_count = fetch_playlist_tracks(sp, playlist_id)
     
-    # Get track positions
+    # Get track positions in playlists
     track_positions = get_tracks_positions_in_playlists(sp, playlists_dict, track_ids)
 
-    # Create a DataFrame to hold all playlist names as columns
-    playlist_names = list(playlists_dict.keys())
-    df = pd.DataFrame(columns=['Artist', 'Track'] + playlist_names)
-
-    # Populate the DataFrame with positions
+    # Prepare data for DataFrame creation
+    data_for_df = []
     for track_id, details in track_positions.items():
-        row = {name: '' for name in playlist_names}  # Initialize row with empty strings
+        row = {playlist: '' for playlist in playlists_dict.keys()}  # Initialize row with empty strings for each playlist
         row['Artist'] = details['artists']
         row['Track'] = details['title']
-
+        
+        # Update row with track positions in playlists
         for playlist_name, positions in details['positions'].items():
-            # Join positions if there are multiple, else just convert to string
-            row[playlist_name] = ', '.join(str(pos + 1) for pos in positions)
+            row[playlist_name] = ', '.join(str(pos + 1) for pos in positions)  # Adjust for zero indexing
+            
+        data_for_df.append(row)
 
-        row_df = pd.DataFrame([row])
-        df = pd.concat([df, row_df], ignore_index=True)
+    # Convert list of dictionaries to DataFrame
+    df = pd.DataFrame(data_for_df, columns=['Artist', 'Track'] + list(playlists_dict.keys()))
 
     return df
 

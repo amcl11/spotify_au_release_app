@@ -3,12 +3,19 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import pandas as pd
 import json
+import os
 # Import your API credentials and custom functions
 from api_credentials import client_id, client_secret
 from functions import fetch_playlist_tracks, get_tracks_positions_in_playlists, load_data, fetch_and_display_playlist_info, load_data_and_create_df
 
 # Set the title of the web application
-st.title('Spotify New Release Playlists & Positions:')
+st.title('New Release AU Playlist Adds:')
+st.write(""" 
+         
+         Check *About* section for which playlists are tracked. 
+        
+         """)
+
 
 # Initialize the Spotify client with your Spotify API client credentials
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
@@ -65,15 +72,17 @@ selected_playlist_id = playlists_dict[selected_playlist]
 
 df = load_data_and_create_df(sp, playlists_dict, playlist_id)
 
-df['Position'] = df['Position'].astype(int)
-df['Position'] = df['Position'] + 1
+# Increase position by +1 to account for 0 index
+df['Position'] = df['Position'].astype(int) + 1
 
 # Filter the DataFrame to include only rows matching the selected playlist
 filtered_df = df[df['Playlist'] == selected_playlist]
-filtered_df = filtered_df.reset_index(drop=True)
 
-if 'index' in filtered_df.columns:
-    filtered_df = filtered_df.drop(columns=['index'])
+# Sort the filtered DataFrame by 'Position' in ascending order
+filtered_df = filtered_df.sort_values(by='Position', ascending=True)
+
+# Reset the index after sorting
+filtered_df = filtered_df.reset_index(drop=True)
 
 # Display the filtered DataFrame
 st.table(filtered_df[['Artist', 'Title', 'Position']])
@@ -84,3 +93,33 @@ st.table(filtered_df[['Artist', 'Title', 'Position']])
 
 
 
+
+
+
+
+
+# User input section for requesting a new playlist to be tracked
+
+user_input = st.text_input("If you want a playlist added. Submit the playlist ID here:")
+
+# Button to submit user input
+submit = st.button('Submit')
+
+if submit:
+    # Load existing data
+    try:
+        with open('user_input.json', 'r') as json_file:
+            data = json.load(json_file)
+            # Assuming the structure is {"user_inputs": ["id1", "id2"]}
+            user_inputs = data.get("user_inputs", [])
+    except FileNotFoundError:
+        user_inputs = []
+
+    # Append the new input
+    user_inputs.append(user_input)
+
+    # Write back to JSON with the updated list
+    with open('user_input.json', 'w') as json_file:
+        json.dump({"user_inputs": user_inputs}, json_file, indent=4)
+    
+    st.success('Submitted')
