@@ -55,11 +55,11 @@ ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 # Format the 'Followers' column to include commas for thousands
 ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}")
 
-# #hack to remove index from table 
+# hack to remove index from table 
 ordered_filtered_df = ordered_filtered_df.assign(hack='').set_index('hack')
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
-st.table(ordered_filtered_df[['Playlist', 'Position', 'Followers']])
+st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
 
 
 # New Section for Playlist selection
@@ -68,22 +68,21 @@ st.write("")
 # Add space
 st.write("")
 st.subheader('Search Adds By Playlist:')
+
 playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
+
 selected_playlist = st.selectbox('Select a Playlist:', playlist_choices, key='playlist_select')
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 
-# #hack to remove index from table 
-filtered_playlist_df = filtered_playlist_df.assign(hack='').set_index('hack')
-
 # Display all songs in the selected playlist
-st.table(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True))
+st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
 
 
 # Display the dictionary in the app
 st.subheader('Cover Artists:')
-for playlist_name, artist_name in cover_artist_dict.items():
-    st.write(f"**{playlist_name}:** {artist_name}")
+cover_artist_df = pd.DataFrame(list(cover_artist_dict.items()), columns=['Playlist Name', 'Cover Artist'])
+st.dataframe(cover_artist_df, use_container_width=True, hide_index=True)
 
 
 st.write('---')  # Add a visual separator
