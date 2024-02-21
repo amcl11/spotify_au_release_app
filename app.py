@@ -1,125 +1,133 @@
 import streamlit as st
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 import pandas as pd
-import json
-import os
-# Import your API credentials and custom functions
-from api_credentials import client_id, client_secret
-from functions import fetch_playlist_tracks, get_tracks_positions_in_playlists, load_data, fetch_and_display_playlist_info, load_data_and_create_df
+import matplotlib.pyplot as plt
 
-# Set the title of the web application
+# Define a function to load the data and decorate it with st.cache_data
+@st.cache_data
+def load_data(filepath):
+    df = pd.read_csv(filepath)
+    return df
+
+# Use the load_data function to load your preprocessed data
+df = load_data('combined_data/streamlit.csv')
+
+# Streamlit app UI
 st.title('New Release AU Playlist Adds:')
-st.write(""" 
-         
-         Check *About* section for which playlists are tracked. 
-        
-         """)
+
+# Combine Artist & Title for the first dropdown box: 
+df['Artist_Title'] = df['Artist'] + " - " + df['Title']
+choices = df['Artist_Title'].unique()
+
+# Sort the choices in alphabetical order before displaying in the dropdown
+sorted_choices = sorted(choices)
+
+# Dropdown for user to select an artist and title
+selected_artist_title = st.selectbox('Select a New Release:', sorted_choices)
+
+# Filter DataFrame based on selection, then drop unnecessary columns for display
+filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
+
+# Order the filtered_df by 'Followers' in descending order
+ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
+
+# Format the 'Followers' column to include commas for thousands
+ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}")
+
+# #hack to remove index from table 
+ordered_filtered_df = ordered_filtered_df.assign(hack='').set_index('hack')
+
+# Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
+st.table(ordered_filtered_df[['Playlist', 'Position', 'Followers']])
 
 
-# Initialize the Spotify client with your Spotify API client credentials
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+# New Section for Playlist selection
+st.write('---')  # Add a visual separator
+st.subheader('Browse Newly Added Songs by Playlist:')
+playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
+selected_playlist = st.selectbox('Select a Playlist:', playlist_choices, key='playlist_select')
+# Filter DataFrame based on the selected playlist
+filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 
-# Function to display the table for a selected track
-def display_table_for_selection(track_positions, selection):
-    # Iterate through each track in the position data
-    for track_id, details in track_positions.items():
-        # Concatenate artist and track title for display
-        artist_track = f"{details['artists']} - {details['title']}"
-        # Check if the current track matches the user's selection
-        if artist_track == selection:
-            # Prepare data for displaying in the table
-            combined_info = [
-                (playlist, positions, details['followers'][playlist])
-                for playlist, positions in details['positions'].items()
-            ]
-            # Sort the data by number of followers in descending order
-            sorted_info = sorted(combined_info, key=lambda x: x[2], reverse=True)
-            
-            # Create a dictionary for the DataFrame
-            table_data = {
-                'Playlist': [info[0] for info in sorted_info],
-                'Position': [', '.join(str(pos + 1) for pos in info[1]) for info in sorted_info],
-                'Playlist Followers': [f"{info[2]:,}" for info in sorted_info]
-            }
+# #hack to remove index from table 
+filtered_playlist_df = filtered_playlist_df.assign(hack='').set_index('hack')
 
-            # Convert the dictionary to a DataFrame and display it as a table
-            df = pd.DataFrame(table_data)
-            st.table(df)
-            break  # Exit the loop after displaying the table for the selected track
-
-# Load playlist data from a JSON file
-with open('playlists.json', 'r') as file:
-    playlists_dict = json.load(file)
-
-# Load data for a specific playlist and prepare the dropdown selection options
-playlist_id = '37i9dQZF1DWT2SPAYawYcO'  # Example: New Music Friday AU & NZ playlist ID
-track_positions = load_data(sp, playlists_dict, playlist_id)
-selections = [f"{details['artists']} - {details['title']}" for _, details in track_positions.items()]
-
-# Create a dropdown for users to select an artist/track
-selected_artist_track = st.selectbox('Select a New Release:', sorted(selections))
-
-# Display the table for the selected artist/track
-if selected_artist_track:
-    display_table_for_selection(track_positions, selected_artist_track)
+# Display all songs in the selected playlist
+st.table(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True))
 
 
-# Create a dropdown for users to select a playlist
-selected_playlist = st.selectbox("Select a playlist to see Friday's additions:", sorted(playlists_dict.keys()))
-selected_playlist_id = playlists_dict[selected_playlist]
+# Most Added Artists
+# Count the occurrences of each artist
+artist_counts = df['Artist'].value_counts()
 
-df = load_data_and_create_df(sp, playlists_dict, playlist_id)
+# Find the maximum number of adds
+max_adds = artist_counts.max()
 
-# Increase position by +1 to account for 0 index
-df['Position'] = df['Position'].astype(int) + 1
+# Find all artists with the most adds
+most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
 
-# Filter the DataFrame to include only rows matching the selected playlist
-filtered_df = df[df['Playlist'] == selected_playlist]
-
-# Sort the filtered DataFrame by 'Position' in ascending order
-filtered_df = filtered_df.sort_values(by='Position', ascending=True)
-
-# Reset the index after sorting
-filtered_df = filtered_df.reset_index(drop=True)
-
-# Display the filtered DataFrame
-st.table(filtered_df[['Artist', 'Title', 'Position']])
+# Format the artist names for display
+if len(most_added_artists) > 1:
+    artist_names = ", ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1]
+    st.write(f"The artists with the most playlist adds are {artist_names} with {max_adds} playlist adds each.")
+else:
+    st.write(f"The artist with the most playlist adds is {most_added_artists[0]} with {max_adds} playlist adds.")
 
 
+# Highest Follower Count
+# Sum the followers count for each artist
+artist_followers = df.groupby('Artist')['Followers'].sum()
 
+# Find the maximum followers count
+max_followers = artist_followers.max()
+
+# Find all artists with the highest followers count
+most_reach_artists = artist_followers[artist_followers == max_followers].index.tolist()
+
+# Format the artist names for display
+if len(most_reach_artists) > 1:
+    artist_names = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1]
+    st.write(f"The artists with the most reach are {artist_names} with a total of {max_followers:,} playlist followers each.")
+else:
+    st.write(f"The artist with the most reach is {most_reach_artists[0]} with a total of {max_followers:,} playlist followers.")
 
 
 
+# Artist with the highest avergae playlist positioning 
+avg_position = df.groupby('Artist')['Position'].mean()
+best_avg_playlist_position_by_artist = avg_position.idxmin()
+best_avg = avg_position.min()
+# Display the result
+st.write(f"The artist with the best average playlist position is {best_avg_playlist_position_by_artist} with an average position of {best_avg:.1f}")
 
 
 
 
 
+# Calculate the number of adds per playlist and sort for plotting
+adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
 
-# User input section for requesting a new playlist to be tracked
+# Setting the style for the plot
+plt.style.use('dark_background')  # Use a dark background style
 
-user_input = st.text_input("If you want a playlist added. Submit the playlist ID here:")
+# Plotting
+fig, ax = plt.subplots(figsize=(8, 10))  # Adjust figure size for readability
+adds_per_playlist.plot(kind='barh', ax=ax, color='#9b59b6')  # Purple bars
 
-# Button to submit user input
-submit = st.button('Submit')
+# Customize tick parameters
+ax.tick_params(axis='x', colors='white')  # White x-axis ticks
+ax.tick_params(axis='y', colors='white')  # White y-axis ticks
 
-if submit:
-    # Load existing data
-    try:
-        with open('user_input.json', 'r') as json_file:
-            data = json.load(json_file)
-            # Assuming the structure is {"user_inputs": ["id1", "id2"]}
-            user_inputs = data.get("user_inputs", [])
-    except FileNotFoundError:
-        user_inputs = []
+# Set labels and title with white text
+ax.set_xlabel('New Songs Added', labelpad=10, weight='bold', color='white')
+ax.set_title('Distribution of New Song Adds Across Playlists', pad=20, weight='bold', color='white', fontsize=14)
 
-    # Append the new input
-    user_inputs.append(user_input)
+# Remove spines
+for location in ['left', 'right', 'top', 'bottom']:
+    ax.spines[location].set_visible(False)
 
-    # Write back to JSON with the updated list
-    with open('user_input.json', 'w') as json_file:
-        json.dump({"user_inputs": user_inputs}, json_file, indent=4)
-    
-    st.success('Submitted')
+plt.show()
+
+# Display the plot in Streamlit
+st.pyplot(fig)
+
+

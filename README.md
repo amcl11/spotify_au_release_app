@@ -1,21 +1,15 @@
-# Spotify_Charts
+# Streamlit app - Spotify New Release(AU) Dashboard
 
-#### Creating a Spotify AU Top 200 dataset:
+A dashboard that pulls all new songs added to New Music Friday AU & NZ from the Spotify API.
 
- - Extracting daily AU Top 200 from https://charts.spotify.com/charts/view/regional-au-daily/latest
+The songs are then checked against the main AU Spotify ecosystem playlists to check if they picked up additonal playlist adds, and what position they were added to. 
 
- - Extracting and appending each Top 200 track's `popularity score` from Spotify API
-
- - Additional data pull from Kworb.net https://kworb.net/spotify/country/au_daily.html. 
-
-#### Spotify Playlist & Postion checker for track_id:
-
- - input track_id, return which key AU playlists (and some key global playlists) the track is in and at what position. 
-
+Some additonal global and non-Spotify owned palylists all also checked such as triple j's New Music Hit List, Singled Out, and Today's Top Hits.
 
 ## List of playlists currently checking: 
 
- - `Top 50 Australia`  
+### AU Spotify Playlists 
+
  - `New Music Friday AU & NZ`  
  - `Hot Hits Australia`  
  - `Front Left`  
@@ -47,7 +41,11 @@
  - `Morning Motivation`
  - `Lazy Sunday`
 
+### Global Spotify Playlists 
+
  - `Today's Top Hits`
  - `Singled Out`
 
+ ### AU non-Spotify Playlists 
 
+  - `triple j's New Music Hitlist`
