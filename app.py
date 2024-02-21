@@ -55,9 +55,6 @@ ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 # Format the 'Followers' column to include commas for thousands
 ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}")
 
-# hack to remove index from table 
-ordered_filtered_df = ordered_filtered_df.assign(hack='').set_index('hack')
-
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
 
@@ -92,19 +89,11 @@ st.subheader('Summary Stats:')
 # Count the occurrences of each artist
 artist_counts = df['Artist'].value_counts()
 
-# Find the maximum number of adds
+# Most Added Artists
 max_adds = artist_counts.max()
-
-# Find all artists with the most adds
 most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
-
-# Format the artist names for display
-if len(most_added_artists) > 1:
-    artist_names = ", ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1]
-    st.write(f"Most Playlist Adds: {artist_names} with {max_adds} playlist adds each.")
-else:
-    st.write(f"Most Playlist Adds: {most_added_artists[0]} with {max_adds} playlist adds.")
-
+artist_names = ", ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
+st.metric(label="Most Playlist Adds", value=f"{artist_names}", delta=f"{max_adds} adds")
 
 
 # Highest Follower Count
@@ -118,20 +107,19 @@ max_followers = artist_followers.max()
 most_reach_artists = artist_followers[artist_followers == max_followers].index.tolist()
 
 # Format the artist names for display
-if len(most_reach_artists) > 1:
-    artist_names = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1]
-    st.write(f"Highest reach: {artist_names} with a total of {max_followers:,} playlist followers across the new additions.")
-else:
-    st.write(f"Highest reach: {most_reach_artists[0]} with a total of {max_followers:,} playlist followers across the new additions.")
-
+artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
+st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,} total combined followers across playlist adds", help='Reminder: This is only based on the playlists that this site tracks', delta_color='normal')
 
 
 # Artist with the highest avergae playlist positioning 
 avg_position = df.groupby('Artist')['Position'].mean()
 best_avg_playlist_position_by_artist = avg_position.idxmin()
 best_avg = avg_position.min()
-# Display the result
-st.write(f"Best Average Playlist Position: {best_avg_playlist_position_by_artist} with an average position of {best_avg:.1f}")
+st.metric(label="Best Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.1f}", delta_color='normal', help='Averages all positions across any new playlist. Can be skewed if artist only recieved 1 or minimal adds')
+
+# Example of using markdown with HTML for colored text (within limitations of Streamlit & Markdown)
+st.markdown(f"<span style='color: red;'>**Highlighted Text:**</span> Some important note here.", unsafe_allow_html=True)
+
 
 # Add space
 st.write("")
@@ -179,4 +167,16 @@ for location in ['left', 'right', 'top', 'bottom']:
 # Display the plot in Streamlit, without needing plt.show()
 st.pyplot(fig)
 
+# Playlist packshots
+# Create three columns
+col1, col2, col3 = st.columns(3)
 
+# Create a list of columns for easier access
+cols = [col1, col2, col3]
+
+# Iterate over your dictionary items
+for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
+    # Calculate the column index in a round-robin fashion
+    col_index = index % 3
+    # Display the image in the appropriate column
+    cols[col_index].image(image_url, caption=playlist_name, width=200)  # Adjust width as needed
