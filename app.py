@@ -9,17 +9,24 @@ def load_data(filepath):
     return df
 
 # Use the load_data function to load your preprocessed data
-df = load_data('combined_data/streamlit.csv')
+df = load_data('streamlit.csv')
 
 # Streamlit app UI
-st.title('New Release AU Playlist Adds:')
+st.title('New Release AU - Spotify Playlist Adds:')
+
+st.write('---')  # Add a visual separator
+
+st.write('Note: This site tracks limited playlists, and is specifically for the AU market.')  # Add a visual separator
+st.write('It pulls all tracks that were added to New Music Friday AU & NZ and then checks to see which other prominent playlists (majority AU) those new releases also were added to.') 
+
+st.write('---')  # Add a visual separator
 
 # Combine Artist & Title for the first dropdown box: 
 df['Artist_Title'] = df['Artist'] + " - " + df['Title']
 choices = df['Artist_Title'].unique()
 
 # Sort the choices in alphabetical order before displaying in the dropdown
-sorted_choices = sorted(choices)
+sorted_choices = sorted(choices, key=lambda x: x.lower())
 
 # Dropdown for user to select an artist and title
 selected_artist_title = st.selectbox('Select a New Release:', sorted_choices)
@@ -54,6 +61,7 @@ filtered_playlist_df = filtered_playlist_df.assign(hack='').set_index('hack')
 # Display all songs in the selected playlist
 st.table(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True))
 
+st.write('---')  # Add a visual separator
 
 # Most Added Artists
 # Count the occurrences of each artist
@@ -101,7 +109,7 @@ st.write(f"The artist with the best average playlist position is {best_avg_playl
 
 
 
-
+st.write('---')  # Add a visual separator
 
 # Calculate the number of adds per playlist and sort for plotting
 adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
@@ -111,23 +119,23 @@ plt.style.use('dark_background')  # Use a dark background style
 
 # Plotting
 fig, ax = plt.subplots(figsize=(8, 10))  # Adjust figure size for readability
-adds_per_playlist.plot(kind='barh', ax=ax, color='#9b59b6')  # Purple bars
+adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
 
-# Customize tick parameters
-ax.tick_params(axis='x', colors='white')  # White x-axis ticks
-ax.tick_params(axis='y', colors='white')  # White y-axis ticks
+# Customize tick parameters for better legibility
+ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
+ax.tick_params(axis='y', colors='white', labelsize=12)  # Adjust y-axis ticks
 
-# Set labels and title with white text
-ax.set_xlabel('New Songs Added', labelpad=10, weight='bold', color='white')
-ax.set_title('Distribution of New Song Adds Across Playlists', pad=20, weight='bold', color='white', fontsize=14)
+# Set labels and title with white text and larger font sizes
+ax.set_xlabel('New Songs Added', labelpad=10, weight='bold', color='white', fontsize=14, loc='center')
+ax.set_title('Distribution of New Song Adds Across Playlists', pad=20, weight='bold', color='white', fontsize=16)
+
+ax.set_xticks([20, 40, 60, 80])
+ax.xaxis.tick_top()
+ax.tick_params(top=False, left=False)
 
 # Remove spines
 for location in ['left', 'right', 'top', 'bottom']:
     ax.spines[location].set_visible(False)
 
-plt.show()
-
-# Display the plot in Streamlit
+# Display the plot in Streamlit, without needing plt.show()
 st.pyplot(fig)
-
-
