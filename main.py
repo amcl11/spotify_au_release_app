@@ -28,7 +28,7 @@ right_column.write(todays_date)
 # Streamlit app UI
 st.title('New Release Playlist Adds:')
 st.write('---')  # Add a visual separator
-st.write('This site tracks limited playlists, specifically for the AU market.')  
+st.write('This site is tailored for the AU market, and predominantly tracks AU playlists.')  
 st.write('It pulls all tracks that were added to New Music Friday AU & NZ, and then checks to see which other prominent playlists (majority AU) those new releases were also added to.')
 st.write('For more info check the about page.')  
 st.write('---')  # Add a visual separator
@@ -75,7 +75,7 @@ filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 # Display all songs in the selected playlist
 st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
 
-
+# Cover Artists 
 # Display the dictionary in the app
 st.subheader('Cover Artists:')
 cover_artist_df = pd.DataFrame(list(cover_artist_dict.items()), columns=['Playlist Name', 'Cover Artist'])
@@ -108,7 +108,7 @@ most_reach_artists = artist_followers[artist_followers == max_followers].index.t
 
 # Format the artist names for display
 artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
-st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,} total combined followers across playlist adds", help='Reminder: This is only based on the playlists that this site tracks', delta_color='normal')
+st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,} total combined follower count across playlist adds", help='Note: This is only based on the playlists that this site tracks', delta_color='normal')
 
 
 # Artist with the highest avergae playlist positioning 
@@ -175,8 +175,13 @@ col1, col2, col3 = st.columns(3)
 cols = [col1, col2, col3]
 
 # Iterate over your dictionary items
+# Loop through each playlist and display its cover image with the artist's name as the caption
 for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
+    # Get the artist name using the playlist name from the cover_artist_name_dict
+    artist_name = cover_artist_dict.get(playlist_name, "Artist Unknown")
+    
     # Calculate the column index in a round-robin fashion
     col_index = index % 3
-    # Display the image in the appropriate column
-    cols[col_index].image(image_url, caption=playlist_name, width=200)  # Adjust width as needed
+    
+    # Display the image in the appropriate column with the artist name as the caption
+    cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=200)
