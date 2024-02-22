@@ -53,7 +53,6 @@ def find_tracks_positions_in_playlists(sp, track_details, playlists_dict):
 
     for playlist_name, playlist_id in playlists_dict.items():
         try:
-            print(f"Checking playlist: {playlist_name}")
             # Fetch tracks and their artists from each playlist
             playlist_tracks = get_playlist_tracks_and_artists(sp, playlist_id)
             for position, (track_name, artist_names) in enumerate(playlist_tracks, start=1):

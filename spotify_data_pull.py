@@ -17,9 +17,8 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Configure logging to file
-logging.basicConfig(filename='log.txt', level=logging.DEBUG,  # Use DEBUG level to capture all types of log messages
+logging.basicConfig(filename='log.txt', level=logging.INFO,  # Use DEBUG level to capture all types of log messages
                     format='%(asctime)s - %(levelname)s - %(message)s')
-logging.debug('Script started.')
 
 # New Music Friday AU & NZ playlist 
 playlist_id = '37i9dQZF1DWT2SPAYawYcO'
@@ -43,9 +42,8 @@ for playlist_name, playlist_id in playlists_dict.items():
     playlist = sp.playlist(playlist_id)
     follower_count = playlist['followers']['total']
     playlist_followers[playlist_name] = follower_count
-    if 'followers' not in playlist:
-        logging.warning(f"Followers data missing in the playlist data for {playlist_id}")
-logging.info("Playlist followers data have been fetched")
+    
+logging.info("Playlist followers data fetched successfully")
 
 # Create and save fetched data as a DataFrame
 rows = []
@@ -70,7 +68,7 @@ for track_id, track_info in track_positions.items():
 df = pd.DataFrame(rows)
 
 df.to_csv('streamlit.csv', index=False)
-logging.info("DataFrame successfully created and exported")
+logging.info("DataFrame created and exported successfully ")
 
 # Start collecting data for the Cover Art and Cover Artist info
 #Fetch Playlist image URLs
@@ -85,7 +83,7 @@ for playlist_name, playlist_id in playlists_dict.items():
 
     # append to dictionary 
     cover_art_dict[playlist_name] = cover_image_url
-logging.info("Cover image URLs successfuly returned")
+logging.info("Cover image URLs returned successfuly")
 
 # Fetch cover artist details 
 # Initialise a dictionary to store playlist name and playlist cover artist details 
@@ -108,7 +106,7 @@ for playlist_name, playlist_id in playlists_dict.items():
         # Add to the dictionary only if the cover artist is meaningful (not 'No cover artist found')
         if cover_artist.strip().lower() != "no cover artist found":
             cover_artist_dict[playlist_name] = cover_artist
-logging.info("Cover artist details successfully returned ")
+logging.info("Cover artist details returned successfully  ")
 
 
 #Remove Image URLs from `cover_art_dict` that don't have a Cover Artist. Only Cover Art featuring an artist is useful. 
@@ -121,7 +119,7 @@ for playlist_name in cover_art_dict:
     if playlist_name in cover_artist_dict:
         # Add it to the new dictionary
         filtered_cover_art_dict[playlist_name] = cover_art_dict[playlist_name]
-logging.info("Non-cover artist covers successfully removed")
+logging.info("Non-cover artist covers removed successfully")
 
 # Save both Cover dictionaries to a single JOSN file for later import use into main.py.
 data = {
@@ -132,4 +130,4 @@ data = {
 # Write the combined dictionary to a file
 with open('cover_art_data.json', 'w') as f:
     json.dump(data, f, indent=4)
-logging.info("Final 'cover_art_data.json' successfully saved")
+logging.info("Final 'cover_art_data.json' saved successfully ")
