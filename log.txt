@@ -1,0 +1,2 @@
+/Users/andrewmclaughlin/anaconda3/envs/dev/bin/python: can't open file '/Users/andrewmclaughlin/Desktop/spotify_data/spotify_au_release_app/spotify_data_pull.py': [Errno 1] Operation not permitted
+/Users/andrewmclaughlin/anaconda3/envs/dev/bin/python: can't open file '/Users/andrewmclaughlin/Desktop/spotify_data/spotify_au_release_app/spotify_data_pull.py': [Errno 1] Operation not permitted
