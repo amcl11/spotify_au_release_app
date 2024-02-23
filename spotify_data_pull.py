@@ -100,9 +100,7 @@ for playlist_name, playlist_id in playlists_dict.items():
     match = re.search(r'cover:\s*(.*?)$', playlist_description, re.IGNORECASE)
     if match:
         cover_artist = match.group(1)  # Extract the matched artist name
-        # Optional: if needed to stop at the first period (.)
-        if '.' in cover_artist:
-            cover_artist = cover_artist.split('.')[0]
+
         # Add to the dictionary only if the cover artist is meaningful (not 'No cover artist found')
         if cover_artist.strip().lower() != "no cover artist found":
             cover_artist_dict[playlist_name] = cover_artist

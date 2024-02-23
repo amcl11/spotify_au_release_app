@@ -28,11 +28,9 @@ right_column.write(todays_date)
 # Streamlit app UI
 st.title('New Release Playlist Adds:')
 st.write('---')  # Add a visual separator
-st.write('This site is tailored for the AU market, and predominantly tracks AU playlists.')  
-st.write('It pulls all tracks that were added to New Music Friday AU & NZ, and then checks to see which other prominent playlists (majority AU) those new releases were also added to.')
-st.write('For more info check the about page.')  
+st.write('This site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial Spotify AU playlists.')  
+st.write('For more info check the About page.')  
 st.write('---')  # Add a visual separator
-
 
 # Combine Artist & Title for the first dropdown box: 
 df['Artist_Title'] = df['Artist'] + " - " + df['Title']
@@ -78,12 +76,12 @@ st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(b
 # Cover Artists 
 # Display the dictionary in the app
 st.subheader('Cover Artists:')
-cover_artist_df = pd.DataFrame(list(cover_artist_dict.items()), columns=['Playlist Name', 'Cover Artist'])
+cover_artist_df = pd.DataFrame(list(cover_artist_dict.items()), columns=['Playlist', 'Cover Artist'])
 st.dataframe(cover_artist_df, use_container_width=True, hide_index=True)
 
 
-st.write('---')  # Add a visual separator
-st.subheader('Summary Stats:')
+# st.subheader("Summary Stats")
+st.write('- - - - - -') 
 
 # Most Added Artists
 # Count the occurrences of each artist
@@ -92,9 +90,8 @@ artist_counts = df['Artist'].value_counts()
 # Most Added Artists
 max_adds = artist_counts.max()
 most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
-artist_names = ", ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
+artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
 st.metric(label="Most Playlist Adds", value=f"{artist_names}", delta=f"{max_adds} adds")
-
 
 # Highest Follower Count
 # Sum the followers count for each artist
@@ -108,18 +105,18 @@ most_reach_artists = artist_followers[artist_followers == max_followers].index.t
 
 # Format the artist names for display
 artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
-st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,} total combined follower count across playlist adds", help='Note: This is only based on the playlists that this site tracks', delta_color='normal')
 
+st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total combined follower count across playlist adds. Only based on the tracked playlists', delta_color='normal')
 
-# Artist with the highest avergae playlist positioning 
+# Artist with the highest average playlist positioning 
 avg_position = df.groupby('Artist')['Position'].mean()
 best_avg_playlist_position_by_artist = avg_position.idxmin()
 best_avg = avg_position.min()
-st.metric(label="Best Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.1f}", delta_color='normal', help='Averages all positions across any new playlist. Can be skewed if artist only recieved 1 or minimal adds')
 
-# Example of using markdown with HTML for colored text (within limitations of Streamlit & Markdown)
-st.markdown(f"<span style='color: red;'>**Highlighted Text:**</span> Some important note here.", unsafe_allow_html=True)
-
+st.metric(label="Highest Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist. Can be skewed if artist only recieved 1 or minimal adds')
+st.write('- - - - - -') 
+# Example of using markdown with HTML for colored text
+# st.markdown(f"<span style='color: red;'>**Highlighted Text:**</span> Some important note here.", unsafe_allow_html=True)
 
 # Add space
 st.write("")
@@ -166,6 +163,11 @@ for location in ['left', 'right', 'top', 'bottom']:
 
 # Display the plot in Streamlit, without needing plt.show()
 st.pyplot(fig)
+
+
+st.write('- - - - - -') 
+st.write("*Note: There may be a delay in cover images updating.*")
+st.write("*Cover artist name may be updated, but cover image may still be updating in the back end.*")
 
 # Playlist packshots
 # Create three columns
