@@ -23,6 +23,7 @@ logging.basicConfig(filename='log.txt', level=logging.INFO,  # Use DEBUG level t
 # New Music Friday AU & NZ playlist 
 playlist_id = '37i9dQZF1DWT2SPAYawYcO'
 
+print('Fetching Spotify data...')
 # Fetches track names and artist names from New Music Friday AU & NZ
 # Returns a list of tuples, each containing a track name and concatenated artist names.
 # Example, [('Foam', 'Royel Otis'),('One More Night', 'KUČKA, Flume')]

@@ -1,0 +1,4 @@
+matplotlib==3.7.1
+pandas==1.5.3
+spotipy==2.23.0
+streamlit==1.31.1
