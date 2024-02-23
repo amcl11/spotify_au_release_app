@@ -1,4 +1,6 @@
 import logging  # Import logging for error logging
+import json
+import re
 
 def get_playlist_tracks_and_artists(sp, playlist_id):
     """
@@ -70,3 +72,34 @@ def find_tracks_positions_in_playlists(sp, track_details, playlists_dict):
     track_positions = {f"{name} - {artist}": info for (name, artist), info in track_info_dict.items()}
 
     return track_positions
+
+
+
+
+# Code for the 'about' section' - User input for a Playlist ID submission 
+
+def save_user_input(playlist_id, file_path='user_input.json'):
+    # Try to read the existing data, if the file does not exist, create an empty structure
+    try:
+        with open(file_path, 'r') as file:
+            current_data = json.load(file)
+    except FileNotFoundError:
+        current_data = {"submitted_playlists": []}
+    
+    # Check if 'submitted_playlists' key exists, if not, create it
+    if 'submitted_playlists' not in current_data:
+        current_data['submitted_playlists'] = []
+    
+    # Add the new playlist ID to the list
+    current_data['submitted_playlists'].append(playlist_id)
+    
+    # Write the updated data back to the JSON file
+    with open(file_path, 'w') as file:
+        json.dump(current_data, file, indent=4)
+
+
+# Function to validate the Spotify playlist link
+def is_valid_spotify_link(link):
+    # Regex pattern for Spotify playlist links
+    pattern = r'https://open\.spotify\.com/playlist/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}'
+    return re.match(pattern, link) is not None

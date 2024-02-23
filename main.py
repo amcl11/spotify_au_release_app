@@ -164,26 +164,11 @@ st.write('- - - - - -')
 st.write("*Note: There may be a delay in cover images updating.*")
 st.write("*Cover artist name may be updated, but cover image may still be updating in the back end.*")
 
+
+
+
+
 # # Playlist packshots
-# # Create three columns
-# col1, col2, col3 = st.columns(3)
-
-# # Create a list of columns for easier access
-# cols = [col1, col2, col3]
-
-# # Iterate over your dictionary items
-# # Loop through each playlist and display its cover image with the artist's name as the caption
-# for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
-#     # Get the artist name using the playlist name from the cover_artist_name_dict
-#     artist_name = cover_artist_dict.get(playlist_name, "Artist Unknown")
-    
-#     # Calculate the column index in a round-robin fashion
-#     col_index = index % 3
-    
-#     # Display the image in the appropriate column with the artist name as the caption
-#     cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=200)
-# Playlist packshots
-# Create three columns
 col1, col2, col3 = st.columns(3)
 
 # Create a list of columns for easier access
@@ -206,3 +191,5 @@ for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
     
     # Display the image in the appropriate column with the artist name as the caption
     cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=200)
+
+
