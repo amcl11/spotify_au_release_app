@@ -1,6 +1,30 @@
-import logging  # Import logging for error logging
+# Import necessary libraries
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+from api_credentials import client_id, client_secret
+import pandas as pd
 import json
 import re
+import matplotlib.pyplot as plt
+from time import sleep
+import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+# Load list of playlists from JSON file
+with open('playlists.json', 'r') as file:
+    playlists_dict = json.load(file)
+
+# Initialise the Spotify client with client credentials for public data access
+client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+import logging
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def get_playlist_tracks_and_artists(sp, playlist_id):
     """
@@ -12,7 +36,7 @@ def get_playlist_tracks_and_artists(sp, playlist_id):
 
     Returns:
     - list: A list of tuples, each containing a track name and concatenated artist names.
-    """
+    """    
     track_details = []
     try:
         # Request specific fields to minimize data transfer
@@ -74,8 +98,6 @@ def find_tracks_positions_in_playlists(sp, track_details, playlists_dict):
     return track_positions
 
 
-
-
 # Code for the 'about' section' - User input for a Playlist ID submission 
 
 def save_user_input(playlist_id, file_path='user_input.json'):
@@ -103,3 +125,46 @@ def is_valid_spotify_link(link):
     # Regex pattern for Spotify playlist links
     pattern = r'https://open\.spotify\.com/playlist/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}'
     return re.match(pattern, link) is not None
+
+
+
+
+
+def is_correct_track(track, artist, title):
+    return track['artists'][0]['name'].lower() == artist.lower() and track['name'].lower() == title.lower()
+
+def update_popularity(artist_title):
+    artist, title = artist_title.split(' - ', 1)
+    try:
+        results = sp.search(q='artist:' + artist + ' track:' + title, type='track', limit=1)
+        if results['tracks']['items']:
+            track = results['tracks']['items'][0]
+            if is_correct_track(track, artist, title):
+                return track['popularity']
+            else:
+                logging.warning(f"No accurate match found for {artist_title}")
+        else:
+            logging.info(f"No results for {artist_title}")
+    except Exception as e:
+        logging.error(f"Error fetching data for {artist_title}: {e}")
+        sleep(1)  # Simple backoff strategy
+    return None  # Return None or a default value for missing/incorrect data
+
+def apply_update_popularity(row):
+    # Extract 'Artist_Title' from the row and call update_popularity
+    return update_popularity(row['Artist_Title'])
+
+
+# Function to check if the last entry in the CSV matches today's date
+def is_latest_entry_today(csv_path, today_date):
+    if os.path.exists(csv_path):
+        # Read the last few lines of the file to find the latest date
+        with open(csv_path, 'r') as file:
+            last_line = None
+            for last_line in (line for line in file if line.rstrip('\n')):
+                pass
+            if last_line:
+                # Assuming the date is the first column
+                last_date = last_line.split(',')[0]
+                return last_date == today_date
+    return False

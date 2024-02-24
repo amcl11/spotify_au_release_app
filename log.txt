@@ -5,3 +5,9 @@
 2024-02-23 15:55:09,020 - INFO - Cover artist details returned successfully  
 2024-02-23 15:55:09,020 - INFO - Non-cover artist covers removed successfully
 2024-02-23 15:55:09,022 - INFO - Final 'cover_art_data.json' saved successfully 
+2024-02-23 18:23:19,628 - INFO - Playlist followers data fetched successfully
+2024-02-23 18:23:19,635 - INFO - DataFrame created and exported successfully 
+2024-02-23 18:23:32,995 - INFO - Cover image URLs returned successfuly
+2024-02-23 18:23:45,830 - INFO - Cover artist details returned successfully  
+2024-02-23 18:23:45,830 - INFO - Non-cover artist covers removed successfully
+2024-02-23 18:23:45,833 - INFO - Final 'cover_art_data.json' saved successfully 

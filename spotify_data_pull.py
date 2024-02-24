@@ -130,3 +130,4 @@ data = {
 with open('cover_art_data.json', 'w') as f:
     json.dump(data, f, indent=4)
 logging.info("Final 'cover_art_data.json' saved successfully ")
+logging.info("Data pull complete.  ")
