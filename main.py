@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import numpy as np
+import sqlite3
 
-# Define a function to load the data and decorate it with st.cache_data
+# Define a function to load the data from both CSV and Database and decorate it with st.cache_data
 @st.cache_data
 def load_data(filepath):
     df = pd.read_csv(filepath)
@@ -85,7 +86,7 @@ st.dataframe(cover_artist_df, use_container_width=True, hide_index=True)
 # st.subheader("Summary Stats")
 st.write('- - - - - -') 
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns([3, 5, 1])  
 
 # Most Added Artists
 # Count the occurrences of each artist
@@ -95,7 +96,7 @@ artist_counts = df['Artist'].value_counts()
 max_adds = artist_counts.max()
 most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
 artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
-with col1:
+with col2:
     st.metric(label="Most Added", value=f"{artist_names}", delta=f"{max_adds} adds")
 
 # Highest Follower Count
@@ -111,7 +112,7 @@ most_reach_artists = artist_followers[artist_followers == max_followers].index.t
 # Format the artist names for display
 artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
 
-with col1:
+with col2:
     st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total combined follower count across playlist adds. Only based on the tracked playlists', delta_color='normal')
 
 # Artist with the highest average playlist positioning 
@@ -119,11 +120,29 @@ avg_position = df.groupby('Artist')['Position'].mean()
 best_avg_playlist_position_by_artist = avg_position.idxmin()
 best_avg = avg_position.min()
 
-with col1:
+with col2:
     st.metric(label="Highest Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist. Can be skewed if artist only recieved 1 or minimal adds')
 st.write('- - - - - -') 
 # Example of using markdown with HTML for colored text
 # st.markdown(f"<span style='color: red;'>**Highlighted Text:**</span> Some important note here.", unsafe_allow_html=True)
+
+
+
+
+# Possible extra line graph 
+
+# col1, col2, col3 = st.columns([1, 6, 1]) 
+
+# col2.write('Popularity Score Since Release')
+# col2.write('Top 3 artists')
+# chart_data = pd.DataFrame(np.random.randn(7, 3), columns=["SZA", "Selena Gomez", "Central Cee"])
+# col2.line_chart(chart_data)
+
+# st.write('- - - - - -') 
+
+
+
+
 
 # Calculate the number of adds per playlist and sort for plotting
 adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
@@ -191,5 +210,6 @@ for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
     
     # Display the image in the appropriate column with the artist name as the caption
     cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=200)
+
 
 
