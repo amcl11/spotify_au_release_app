@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 
-# Define a function to load the data from both CSV and Database and decorate it with st.cache_data
+# Define a function to load the CSV data and decorate it with st.cache_data
 @st.cache_data
 def load_data(filepath):
     df = pd.read_csv(filepath)

@@ -10,7 +10,7 @@ def show_info():
     """
 
     # App Title
-    st.title('New Music Spotify Playlist Tracker (AU)')
+    st.title('New Music Playlist Tracker (AU)')
     st.write("""
     This site aims to streamline Friday morning playlist checking for those interested in New Release coverage. 
     
@@ -85,7 +85,7 @@ st.write("")
 
 # Display the input field and submit button
 st.write("If you'd like another playlist considered for tracking, submit it's playlist ID below:")
-st.write("Please only submit AU Spotify Editorial Playlists, not algorithmic playlists.")
+st.write("Only submit AU Spotify Editorial Playlists, not algorithmic playlists.")
 
 st.markdown("""
 ### How to Submit a Spotify Playlist ID:

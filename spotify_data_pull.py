@@ -55,7 +55,7 @@ for track_id, track_info in track_positions.items():
     for playlist_info in track_info['playlists']:
         playlist_name = playlist_info['playlist']
         position = playlist_info['position']
-        # Fetch the actual follower count using the playlist name
+        # Fetch the follower count using the playlist name
         followers = playlist_followers.get(playlist_name, 0)  # Default to 0 if playlist not found
         rows.append({
             'Artist': artist_name,

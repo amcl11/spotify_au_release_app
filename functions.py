@@ -120,14 +120,11 @@ def save_user_input(playlist_id, file_path='user_input.json'):
         json.dump(current_data, file, indent=4)
 
 
-# Function to validate the Spotify playlist link
+# Function to validate the Spotify playlist link for the Submission form 
 def is_valid_spotify_link(link):
     # Regex pattern for Spotify playlist links
     pattern = r'https://open\.spotify\.com/playlist/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}'
     return re.match(pattern, link) is not None
-
-
-
 
 
 def is_correct_track(track, artist, title):
@@ -168,3 +165,18 @@ def is_latest_entry_today(csv_path, today_date):
                 last_date = last_line.split(',')[0]
                 return last_date == today_date
     return False
+
+
+# Function to load the JSON file into a DataFrame before merging and storing in SQL db
+def load_json_to_dataframe(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    
+    # Transform the nested dictionaries into a pandas DataFrame
+    dataframe = pd.DataFrame({
+        'Playlist': list(data['filtered_cover_art_dict'].keys()),
+        'Cover Art URL': list(data['filtered_cover_art_dict'].values()),
+        'Featured Artist': list(data['cover_artist_dict'].values())
+    })
+    
+    return dataframe

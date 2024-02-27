@@ -3,10 +3,29 @@ import pandas as pd
 from datetime import datetime
 import sqlite3
 
+# Function to fetch unique dates from the database
+@st.cache_data
+def fetch_unique_dates():
+    conn = sqlite3.connect('spotify_nmf_data.db')
+    query = "SELECT DISTINCT Date FROM nmf_spotify_coverage ORDER BY Date DESC"
+    unique_dates_df = pd.read_sql_query(query, conn)
+    conn.close()
+
+    # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
+    # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
+    unique_dates_df['Date'] = pd.to_datetime(unique_dates_df['Date'], format='%Y-%m-%d', errors='coerce')
+    
+    # Filter out any rows where the date could not be parsed
+    unique_dates_df = unique_dates_df.dropna(subset=['Date'])
+
+    # Convert dates to a more readable string format for display
+    return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
+
+
+# Function to load database data based on selected date
 @st.cache_data
 def load_db(selected_date_for_sql):
     conn = sqlite3.connect('spotify_nmf_data.db')
-    # Use parameter substitution to securely filter by the selected date
     query = "SELECT * FROM nmf_spotify_coverage WHERE Date = ?"
     database_df = pd.read_sql_query(query, conn, params=[selected_date_for_sql])
     conn.close()
@@ -14,25 +33,19 @@ def load_db(selected_date_for_sql):
 
 st.subheader('Select a previous Friday to explore past coverage...')
 
-# Example list of dates as datetime objects
-dates = [datetime(2024, 2, 23), datetime(2024, 3, 1), datetime(2024, 3, 8)]
-# Format dates into a more readable form and reverse the conversion for SQL
-date_options = [(date.strftime("%A %d %B %Y"), date.strftime("%Y-%m-%d")) for date in dates]
+# Fetch unique dates and prepare them for the selectbox
+unique_dates = fetch_unique_dates()
 
-# Create a dictionary for date mapping
-date_mapping = {date_format: date_sql for date_format, date_sql in date_options}
+st.write('- - - - - -')
 
 # Let the user select a date
-selected_date_format = st.selectbox("Select a Friday", options=[date[0] for date in date_options])
+selected_date_format = st.selectbox("Select a Friday", options=unique_dates)
 
-# Get the corresponding SQL formatted date
-selected_date_for_sql = date_mapping[selected_date_format]
-
-st.write(f"Showing results for: {selected_date_format}")
+# Convert the selected date back to the original format for SQL query
+selected_date_for_sql = datetime.strptime(selected_date_format, "%A %d %B %Y").strftime("%Y-%m-%d")
 
 # Load the data for the selected date
 df = load_db(selected_date_for_sql)
-
 
 st.write('- - - - - -') 
 
