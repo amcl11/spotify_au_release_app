@@ -6,6 +6,11 @@ import pandas as pd
 from functions import apply_update_popularity, is_latest_entry_today
 from datetime import date
 import os
+import logging
+
+# Configure logging to file
+logging.basicConfig(filename='log.txt', level=logging.INFO,  
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Initialise the Spotify client with client credentials for public data access
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
@@ -47,6 +52,8 @@ if not is_latest_entry_today(csv_file_path, today_date):
     file_exists = os.path.isfile(csv_file_path)
     # Append the DataFrame to the CSV file, without the header if the file already exists
     final_df.to_csv(csv_file_path, mode='a', index=False, header=not file_exists)
+    logging.info('popularity csv has been updated')
+    
 else:
     print("Today's data has already been appended. Skipping.")
 

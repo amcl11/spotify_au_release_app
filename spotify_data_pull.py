@@ -17,7 +17,7 @@ client_credentials_manager = SpotifyClientCredentials(client_id=client_id, clien
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Configure logging to file
-logging.basicConfig(filename='log.txt', level=logging.INFO,  # Use DEBUG level to capture all types of log messages
+logging.basicConfig(filename='log.txt', level=logging.INFO,  
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 # New Music Friday AU & NZ playlist 

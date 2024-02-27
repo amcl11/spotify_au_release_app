@@ -3,8 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import json
-import numpy as np
-import sqlite3
 
 # Define a function to load the data from both CSV and Database and decorate it with st.cache_data
 @st.cache_data
@@ -58,7 +56,6 @@ ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
-
 
 # New Section for Playlist selection
 # Add space
