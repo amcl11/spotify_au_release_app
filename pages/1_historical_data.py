@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import sqlite3
+import plotly.express as px
 
 # Function to fetch unique dates from the database
 @st.cache_data
@@ -86,4 +87,63 @@ filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 
 # Display all songs in the selected playlist
 st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
+
+
+################# testing new function. 
+# Function to fetch all data for artists with more than one unique title
+
+@st.cache_data
+def fetch_artists_for_selectbox():
+    conn = sqlite3.connect('spotify_nmf_data.db')
+    query = """
+    SELECT Artist
+    FROM nmf_spotify_coverage 
+    GROUP BY Artist 
+    HAVING COUNT(DISTINCT Title) > 1
+    """
+    artists_df = pd.read_sql_query(query, conn)
+    conn.close()
+    return artists_df['Artist'].tolist()
+
+# Function to fetch all available data for a selected artist
+@st.cache_data
+def fetch_data_for_selected_artist(artist_name):
+    conn = sqlite3.connect('spotify_nmf_data.db')
+    query = "SELECT * FROM nmf_spotify_coverage WHERE Artist = ?"
+    artist_data_df = pd.read_sql_query(query, conn, params=(artist_name,))
+    conn.close()
+    return artist_data_df
+
+st.write('--------------')
+# Populate a selectbox with artist names
+artists = fetch_artists_for_selectbox()
+selected_artist = st.selectbox('Select an Artist that has multiple New Release tracks to compare release performance', artists)
+
+# Fetch and display data for the selected artist
+if selected_artist:
+    artist_data = fetch_data_for_selected_artist(selected_artist)
+    # Now you can perform your logic with 'artist_data' or display it
+
+titles_of_interest = artist_data['Title'].unique()
+artist_data_filtered = artist_data[artist_data['Title'].isin(titles_of_interest)]
+
+# Now we create the bar chart.
+fig = px.bar(artist_data_filtered, x='Playlist', y='Position', color='Title', barmode='group')
+
+# Optional: Update layout for better readability or aesthetics.
+fig.update_layout(
+    title='Playlist Position by Title',
+    xaxis_title='',
+    yaxis_title='Position',
+    legend_title='Title'
+    )
+
+# Show the figure in Streamlit
+st.plotly_chart(fig, use_container_width=True)
+
+
+ 
+
+    
+
 

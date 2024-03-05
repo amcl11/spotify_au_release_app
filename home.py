@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import json
+import plotly.express as px
 
 # Define a function to load the CSV data and decorate it with st.cache_data
 @st.cache_data
@@ -26,12 +27,112 @@ left_column.image('images/nmf_logo.png')
 todays_date = datetime.now().strftime("%A, %d %B, %Y")  # Format the date as Weekday, Day, Month, Year
 right_column.write(todays_date)
 
+
 # Streamlit app UI
 st.title('New Release Playlist Adds:')
 st.write('---')  # Add a visual separator
-st.write('This site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial Spotify AU playlists.')  
+st.write('This site pulls all songs added to *New Music Friday AU & NZ*, and then checks to see if these songs have also been added to any key editorial Spotify AU playlists.')  
 st.write('For more info check the About page.')  
 st.write('---')  # Add a visual separator
+
+
+col1, col2, col3 = st.columns([300, 0.5, 0.5])  
+
+st.markdown(
+    """
+<style>
+[data-testid="stMetricValue"] {
+    font-size: 30px;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+##########################################################
+
+# Most Added Artists
+# Count the occurrences of each artist
+artist_counts = df['Artist'].value_counts()
+max_adds = artist_counts.max()
+most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
+artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
+with col1:
+    st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
+
+# Highest Follower Count
+# Sum the followers count for each artist
+artist_followers = df.groupby('Artist')['Followers'].sum()
+
+# Find the maximum followers count
+max_followers = artist_followers.max()
+
+# Find all artists with the highest followers count
+most_reach_artists = artist_followers[artist_followers == max_followers].index.tolist()
+
+# Format the artist names for display
+artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
+
+with col1:
+    st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total combined follower count across playlist adds. Only based on the tracked playlists', delta_color='normal')
+
+# Artist with the highest average playlist positioning 
+avg_position = df.groupby('Artist')['Position'].mean()
+best_avg_playlist_position_by_artist = avg_position.idxmin()
+best_avg = avg_position.min()
+
+with col1:
+    st.metric(label="Highest Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist. Can be skewed if artist only recieved 1 or minimal adds')
+
+
+##########################################################
+st.write('') 
+
+top_artists_reach = df.groupby('Artist').agg({
+    'Followers': 'sum',
+    'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
+})
+
+# Sort the DataFrame based on 'Followers' while maintaining the whole DataFrame
+sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
+
+# Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
+results_with_playlist = sorted_top_artists_reach.head(5)
+
+# Convert 'Playlist' list to a string for each artist
+results_with_playlist['Playlist_str'] = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
+
+# Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
+results_with_playlist = results_with_playlist.reset_index()
+
+# Create a bar chart using Plotly Express
+fig = px.bar(results_with_playlist, x='Artist', y='Followers',
+             text='Followers', title="Top 5 Highest Reach",
+             hover_data=['Playlist_str'])  # Add 'Playlist_str' to hover data
+
+# Custom hover template to include Playlist information
+fig.update_traces(hovertemplate='<b>%{x}</b><br>Reach: %{y:,}<br>Playlists: %{customdata[0]}')
+
+# Display the exact number of followers on top of each bar and adjust other aesthetics
+fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
+fig.update_layout(
+    xaxis_title="",
+    yaxis_title="Total Reach",
+    yaxis=dict(type='linear'),
+    xaxis_tickangle=-30,
+    plot_bgcolor='rgba(0,0,0,0)',
+    margin=dict(t=30),
+    title=dict(
+        text='Top 5 Highest Reach',
+        y=0.9,  # Adjust the title's position on the y-axis
+        x=0.5,  # Center the title on the x-axis
+        xanchor='center',  # Use the center of the title for x positioning
+        yanchor='top'  # Anchor the title to the top of the layout
+))
+# Display the figure in Streamlit
+st.plotly_chart(fig, use_container_width=True)
+
+##########################################################
 
 # Combine Artist & Title for the first dropdown box: 
 df['Artist_Title'] = df['Artist'] + " - " + df['Title']
@@ -80,118 +181,12 @@ cover_artist_df = pd.DataFrame(list(cover_artist_dict.items()), columns=['Playli
 st.dataframe(cover_artist_df, use_container_width=True, hide_index=True)
 
 
-# st.subheader("Summary Stats")
-st.write('- - - - - -') 
-
-col1, col2, col3 = st.columns([300, 0.5, 0.5])  
-
-st.markdown(
-    """
-<style>
-[data-testid="stMetricValue"] {
-    font-size: 18px;
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-# Most Added Artists
-# Count the occurrences of each artist
-artist_counts = df['Artist'].value_counts()
-
-# Most Added Artists
-max_adds = artist_counts.max()
-most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
-artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
-with col1:
-    st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
-
-# Highest Follower Count
-# Sum the followers count for each artist
-artist_followers = df.groupby('Artist')['Followers'].sum()
-
-# Find the maximum followers count
-max_followers = artist_followers.max()
-
-# Find all artists with the highest followers count
-most_reach_artists = artist_followers[artist_followers == max_followers].index.tolist()
-
-# Format the artist names for display
-artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
-
-with col1:
-    st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total combined follower count across playlist adds. Only based on the tracked playlists', delta_color='normal')
-
-# Artist with the highest average playlist positioning 
-avg_position = df.groupby('Artist')['Position'].mean()
-best_avg_playlist_position_by_artist = avg_position.idxmin()
-best_avg = avg_position.min()
-
-with col1:
-    st.metric(label="Highest Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist. Can be skewed if artist only recieved 1 or minimal adds')
-st.write('- - - - - -') 
-# Example of using markdown with HTML for colored text
-# st.markdown(f"<span style='color: red;'>**Highlighted Text:**</span> Some important note here.", unsafe_allow_html=True)
-
-
-
-
-# Possible extra line graph 
-
-# col1, col2, col3 = st.columns([1, 6, 1]) 
-
-# col2.write('Popularity Score Since Release')
-# col2.write('Top 3 artists')
-# chart_data = pd.DataFrame(np.random.randn(7, 3), columns=["SZA", "Selena Gomez", "Central Cee"])
-# col2.line_chart(chart_data)
-
-# st.write('- - - - - -') 
-
-
-
-
-
-# Calculate the number of adds per playlist and sort for plotting
-adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
-
-# Setting the style for the plot
-plt.style.use('dark_background')  # Use a dark background style
-
-# Plotting
-fig, ax = plt.subplots(figsize=(6, 8))  # Adjust figure size for readability
-adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
-
-# Customize tick parameters for better legibility
-ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
-ax.tick_params(axis='y', colors='white', labelsize=12)  # Adjust y-axis ticks
-
-ax.set_title('Adds By Playlist', pad=70, weight='bold', color='white', fontsize=20, loc='left')
-
-# Explicitly remove the grid
-ax.grid(False)
-
-# Move the x-axis label to the top
-ax.xaxis.set_label_position('top')
-
-ax.xaxis.tick_top()
-
-# Set the x-axis label with custom formatting
-ax.set_xlabel('No. of New Releases Added', labelpad=20, weight='light', color='white', fontsize=10, loc='left')
-ax.set_xticks([10, 20, 30, 40, 50, 60, 70, 80])
-ax.tick_params(top=False, left=False, right=False)
-# Assume the rest of the code is written
-ax.axvline(x=10, ymin=0.01, c='grey', alpha=0.4)
-
-# Remove spines
-for location in ['left', 'right', 'top', 'bottom']:
-    ax.spines[location].set_visible(False)
-
-# Display the plot in Streamlit, without needing plt.show()
-st.pyplot(fig)
-
 
 st.write('- - - - - -') 
+
+##########################################################
+
+
 st.write("*Note: Cover artist may update before cover images*")
 
 
@@ -219,5 +214,42 @@ for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
     # Display the image in the appropriate column with the artist name as the caption
     cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=200)
 
+st.write('- - - - - -') 
 
+##########################################################
 
+# Calculate the number of adds per playlist and sort for plotting
+adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
+
+# Setting the style for the plot
+plt.style.use('dark_background')  # Use a dark background style
+
+# Plotting
+fig, ax = plt.subplots(figsize=(6, 8))  # Adjust figure size for readability
+adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
+
+# Customize tick parameters for better legibility
+ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
+ax.tick_params(axis='y', colors='white', labelsize=12)  # Adjust y-axis ticks
+ax.set_title('Adds By Playlist', pad=70, weight='bold', color='white', fontsize=20, loc='left')
+
+# Explicitly remove the grid
+ax.grid(False)
+
+# Move the x-axis label to the top
+ax.xaxis.set_label_position('top')
+
+ax.xaxis.tick_top()
+
+# Set the x-axis label with custom formatting
+ax.set_xlabel('No. of New Releases Added', labelpad=20, weight='light', color='white', fontsize=10, loc='left')
+ax.set_xticks([10, 20, 30, 40, 50, 60, 70, 80])
+ax.tick_params(top=False, left=False, right=False)
+# Assume the rest of the code is written
+ax.axvline(x=10, ymin=0.01, c='grey', alpha=0.4)
+
+# Remove spines
+for location in ['left', 'right', 'top', 'bottom']:
+    ax.spines[location].set_visible(False)
+
+st.pyplot(fig)

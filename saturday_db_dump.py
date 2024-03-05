@@ -16,7 +16,7 @@ try:
 
     try:
         # read in Friday's main CSV file 
-        df = pd.read_csv('streamlist.csv')
+        df = pd.read_csv('streamlit.csv')
     except FileNotFoundError as fnf_error:
         logging.error(f"CSV file not found: {fnf_error}")
         raise  # Re-raise exception after logging to ensure script stops if file is missing
@@ -40,6 +40,20 @@ try:
 
     # Combined both DFs on 'Date' and 'Playlist'
     merged_df = pd.merge(df, cover_info_df, on=['Date', 'Playlist'], how='left')
+
+    # rename columns to match DB 
+    rename_mapping = {
+        'Date': 'Date',
+        'Artist' : 'Artist',
+        'Title' : 'Title',
+        'Playlist' : 'Playlist',
+        'Position' : 'Position',
+        'Followers' : 'Followers',
+        'Cover Art URL' : 'Image_URL',
+        'Featured Artist' : 'Cover_Artist'
+    }
+    
+    merged_df.rename(columns=rename_mapping, inplace=True)
 
     # Save CSV file ready for SQLite dump with dynamic date in file name
     file_name = f'archived_nmf_data/{formatted_date}.csv'
