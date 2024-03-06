@@ -1,15 +1,17 @@
+import os
 import streamlit as st
+
+# Set Streamlit configuration options here, directly in the script.
+st.set_option('server.headless', True)
+st.set_option('server.enableCORS', False)
+st.set_option('server.port', int(os.environ.get('PORT', 8501)))  # Use the PORT env var provided by Heroku, or default to 8501 if running locally.
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import plotly.express as px
-import os
 
-# Set Streamlit configuration directly through the script
-st.set_option('server.headless', True)
-st.set_option('server.enableCORS', False)
-st.set_option('server.port', int(os.environ.get('PORT', '8501')))
 
 # Define a function to load the CSV data and decorate it with st.cache_data
 @st.cache_data
