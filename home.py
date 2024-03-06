@@ -42,7 +42,7 @@ st.markdown(
     """
 <style>
 [data-testid="stMetricValue"] {
-    font-size: 30px;
+    font-size: 20px;
 }
 </style>
 """,
@@ -86,7 +86,6 @@ with col1:
 
 
 ##########################################################
-st.write('') 
 
 top_artists_reach = df.groupby('Artist').agg({
     'Followers': 'sum',
@@ -107,7 +106,7 @@ results_with_playlist = results_with_playlist.reset_index()
 
 # Create a bar chart using Plotly Express
 fig = px.bar(results_with_playlist, x='Artist', y='Followers',
-             text='Followers', title="Top 5 Highest Reach",
+             text='Followers',
              hover_data=['Playlist_str'])  # Add 'Playlist_str' to hover data
 
 # Custom hover template to include Playlist information
@@ -121,7 +120,7 @@ fig.update_layout(
     yaxis=dict(type='linear'),
     xaxis_tickangle=-30,
     plot_bgcolor='rgba(0,0,0,0)',
-    margin=dict(t=30),
+    margin=dict(t=100),
     title=dict(
         text='Top 5 Highest Reach',
         y=0.9,  # Adjust the title's position on the y-axis

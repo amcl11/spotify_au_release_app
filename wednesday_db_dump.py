@@ -25,7 +25,7 @@ try:
     # Add Date to CSV file before storing in SQLite 
     # As this script will run on Saturday, date needs to be one day prior
     todays_date = datetime.today()
-    date_to_add = todays_date - timedelta(days=1)
+    date_to_add = todays_date - timedelta(days=5)
     formatted_date = date_to_add.strftime('%Y-%m-%d') # Format the date as a string in 'YYYY-MM-DD' format
     df.insert(0, 'Date', formatted_date)
 
