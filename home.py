@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import plotly.express as px
+import os
+
+# Set Streamlit configuration directly through the script
+st.set_option('server.headless', True)
+st.set_option('server.enableCORS', False)
+st.set_option('server.port', int(os.environ.get('PORT', '8501')))
 
 # Define a function to load the CSV data and decorate it with st.cache_data
 @st.cache_data
