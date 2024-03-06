@@ -122,26 +122,52 @@ selected_artist = st.selectbox('Select an Artist that has multiple New Release t
 # Fetch and display data for the selected artist
 if selected_artist:
     artist_data = fetch_data_for_selected_artist(selected_artist)
-    # Now you can perform your logic with 'artist_data' or display it
+
+# Now decide logic with 'artist_data' 
+
+# Get the total followers for each title
+total_followers_per_title = artist_data.groupby('Title')['Followers'].sum().reset_index()
+    
+# Sort the titles by total followers in descending order
+sorted_titles = total_followers_per_title.sort_values(by='Followers', ascending=False)['Title']
 
 titles_of_interest = artist_data['Title'].unique()
+# Use this order for the x-axis order in the plot
 artist_data_filtered = artist_data[artist_data['Title'].isin(titles_of_interest)]
 
-# Now we create the bar chart.
-fig = px.bar(artist_data_filtered, x='Playlist', y='Position', color='Title', barmode='group')
+# st.dataframe(artist_data_filtered) # for viewing data fo now 
 
-# Optional: Update layout for better readability or aesthetics.
+total_playlist_adds = artist_data_filtered.groupby('Title')['Playlist'].nunique()
+
+# Stacked bar chart for Reach comparision
+fig = px.bar(artist_data_filtered, 
+    x='Title', 
+    y='Followers', 
+    color='Playlist', 
+    text='Playlist', 
+    custom_data=['Position'],  # Include 'Position' in custom data for access in hovertemplate
+    category_orders={'Title': sorted_titles.tolist()})
+    
+# Update the layout for a better visual representation
 fig.update_layout(
-    title='Playlist Position by Title',
-    xaxis_title='',
-    yaxis_title='Position',
-    legend_title='Title'
+    barmode='stack',
+    title="Total Reach on Release",
+    xaxis_title="",
+    yaxis_title="",
+    legend_title="Playlists"
     )
+    
+# Customize hover data
+# Customize hover data with 'Position' included
+fig.update_traces(
+    textposition='inside',
+    hovertemplate="<b>Playlist:</b> %{text}<br>" + 
+                  "<b>Playlist Reach:</b> %{y:,.0f}<br>" + 
+                  "<b>Position:</b> %{customdata[0]}<extra></extra>"  # %{customdata[0]} accesses the first item in custom data
+)
 
 # Show the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True)
-
-
  
 
     

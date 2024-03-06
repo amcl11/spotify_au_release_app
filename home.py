@@ -104,10 +104,18 @@ results_with_playlist['Playlist_str'] = results_with_playlist['Playlist'].apply(
 # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()
 
+# Create a color scale
+# This creates a gradient from light to dark blue
+color_scale = [[0, 'lightblue'], [1, 'darkblue']]
+
+
 # Create a bar chart using Plotly Express
 fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              text='Followers',
-             hover_data=['Playlist_str'])  # Add 'Playlist_str' to hover data
+             hover_data=['Playlist_str'],  # Add 'Playlist_str' to hover data
+             color='Followers',  # Assign color based on 'Followers' values
+             color_continuous_scale=color_scale  # Use the custom color scale
+             )
 
 # Custom hover template to include Playlist information
 fig.update_traces(hovertemplate='<b>%{x}</b><br>Reach: %{y:,}<br>Playlists: %{customdata[0]}')
@@ -127,7 +135,10 @@ fig.update_layout(
         x=0.5,  # Center the title on the x-axis
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
-))
+),
+    coloraxis_showscale=False  # Optionally hide the color scale legend
+    
+    )
 # Display the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True)
 
