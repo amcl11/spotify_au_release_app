@@ -2,3 +2,4 @@ api_credentials.py
 __pycache__
 .cache
 .DS_Store
+.env
