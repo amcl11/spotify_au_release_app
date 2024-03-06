@@ -12,9 +12,15 @@ def show_info():
     # App Title
     st.title('New Music Playlist Tracker (AU)')
     st.write("""
-    This site aims to streamline Friday morning playlist checking for those interested in New Release coverage. 
+    This site aims to streamline Friday morning playlist checking for those interested in New Release coverage as well as historical coverage. 
     
-    Not every new release is tracked... the list of new releases focuses on songs that were added to New Music Friday AU & NZ. It then uses this group of songs to check if they were also added to other key AU editorial Spotify playlists and also what positions they recieved.  
+    Not every new release is tracked... the list of new releases solely focuses on songs that were added to 
+    
+    *New Music Friday AU & NZ*. 
+    
+    It then uses this group of songs to check if they were also added to other key AU editorial playlists and also what positions they recieved.  
+    
+    *Note:* The historical coverage cut off is Wednesday after the previous Friday release. This gives tracks a chance to be added to larger playlists like Top 50 / Hot Hits Australia. That means, historical data is a snapshot of coverage between release day and the following Wednesday 9am. 
     
     """)
     st.write('- - - - - -') 
