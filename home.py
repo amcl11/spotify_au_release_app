@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import plotly.express as px
+import streamlit.components.v1 as components
+
+# Read the HTML file
+with open("components/google_analytics.html", "r") as f:
+    google_analytics = f.read()
+
+# Load the Google Analytics script in your Streamlit app
+components.html(google_analytics, height=0, width=0, scrolling=False)
 
 # Define a function to load the CSV data and decorate it with st.cache_data
 @st.cache_data
