@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import plotly.express as px
+from theme import set_theme
 
 import streamlit.components.v1 as components
 # Your Google Analytics tracking code
