@@ -5,9 +5,6 @@ from datetime import datetime
 import json
 import plotly.express as px
 import streamlit.components.v1 as components
-import streamlit_analytics
-
-streamlit_analytics.start_tracking()
 
 # Read the HTML file
 with open("components/google_analytics.html", "r") as f:
