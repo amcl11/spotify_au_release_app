@@ -3,6 +3,16 @@ import pandas as pd
 from datetime import datetime
 import sqlite3
 import plotly.express as px
+import streamlit.components.v1 as components
+
+# Read the HTML file
+with open("components/google_analytics.html", "r") as f:
+    google_analytics = f.read()
+
+# Load the Google Analytics script in your Streamlit app
+components.html(google_analytics, height=0, width=0, scrolling=False)
+
+
 
 # Function to fetch unique dates from the database
 @st.cache_data
