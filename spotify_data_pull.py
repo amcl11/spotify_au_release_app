@@ -7,10 +7,16 @@ from functions import get_playlist_tracks_and_artists, find_tracks_positions_in_
 import json
 import re
 import logging 
+import os
 
-# Use Streamlit's st.secrets to get the secret values
-CLIENT_ID = st.secrets["CLIENT_ID"]
-CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
+# Fetch API key and secret key from environment variables
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+
+
+# # Use Streamlit's st.secrets to get the secret values
+# CLIENT_ID = st.secrets["CLIENT_ID"]
+# CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
 
 # Load list of playlists from JSON file
 with open('playlists.json', 'r') as file:

@@ -9,24 +9,25 @@ from time import sleep
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Use Streamlit's st.secrets to get the secret values
-CLIENT_ID = st.secrets["CLIENT_ID"]
-CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
-
-# Load list of playlists from JSON file
-with open('playlists.json', 'r') as file:
-    playlists_dict = json.load(file)
+# Fetch API key and secret key from environment variables
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
 # Initialise the Spotify client with client credentials for public data access
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-import logging
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# # Use Streamlit's st.secrets to get the secret values
+# CLIENT_ID = st.secrets["CLIENT_ID"]
+# CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
+
+# Load list of playlists from JSON file
+with open('playlists.json', 'r') as file:
+    playlists_dict = json.load(file)
 
 
 def get_playlist_tracks_and_artists(sp, playlist_id):
