@@ -6,7 +6,7 @@ import json
 import plotly.express as px
 from theme import set_theme
 
-set_theme()
+# set_theme()
 
 import streamlit.components.v1 as components
 # Your Google Analytics tracking code
