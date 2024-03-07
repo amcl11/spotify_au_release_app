@@ -2,18 +2,10 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import plotly.express as px
-import streamlit.components.v1 as components
-
-# Read the HTML file
-with open("components/google_analytics.html", "r") as f:
-    google_analytics = f.read()
-
-# Load the Google Analytics script in your Streamlit app
-components.html(google_analytics, height=0, width=0, scrolling=False)
 
 
 st.subheader('If an artist has had multiple releases since 23rd February 2024, you can compare release coverage here.')
-st.write('*Reminder: This site only tracks releases that were added to NMF AU & NZ*')
+st.write('*This site only tracks releases that were added to NMF AU & NZ*')
 # Function to fetch all data for artists with more than one unique title
 @st.cache_data
 def fetch_artists_for_selectbox():
