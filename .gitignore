@@ -3,22 +3,22 @@
 .streamlit/secrets.toml
 
 # Python cache files
-__pycache__/
+__pycache__
 *.py[cod]
 
 # Jupyter Notebook checkpoints and files
-.ipynb_checkpoints/
+.ipynb_checkpoints
 data_check.ipynb
 
 # macOS system files
 .DS_Store
 
 # Virtual environment
-venv/
-env/
+venv
+env
 
 # Cache directories
-.cache/
+.cache
 
 # Log files
 log.txt
