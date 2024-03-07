@@ -1,26 +1,23 @@
 import streamlit as st
+import os
+from sqlalchemy import create_engine
 import pandas as pd
 from datetime import datetime
-import sqlite3
 import plotly.express as px
-import streamlit.components.v1 as components
-
-# Read the HTML file
-with open("components/google_analytics.html", "r") as f:
-    google_analytics = f.read()
-
-# Load the Google Analytics script in your Streamlit app
-components.html(google_analytics, height=0, width=0, scrolling=False)
+pd.options.mode.chained_assignment = None  # default='warn'
 
 
+DATABASE_URL = os.environ['DATABASE_URL']
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(DATABASE_URL)
 
 # Function to fetch unique dates from the database
 @st.cache_data
 def fetch_unique_dates():
-    conn = sqlite3.connect('spotify_nmf_data.db')
-    query = "SELECT DISTINCT Date FROM nmf_spotify_coverage ORDER BY Date DESC"
-    unique_dates_df = pd.read_sql_query(query, conn)
-    conn.close()
+    query = "SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC"
+    unique_dates_df = pd.read_sql_query(query, engine)
 
     # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
     # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
@@ -36,10 +33,8 @@ def fetch_unique_dates():
 # Function to load database data based on selected date
 @st.cache_data
 def load_db(selected_date_for_sql):
-    conn = sqlite3.connect('spotify_nmf_data.db')
-    query = "SELECT * FROM nmf_spotify_coverage WHERE Date = ?"
-    database_df = pd.read_sql_query(query, conn, params=[selected_date_for_sql])
-    conn.close()
+    query = "SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = %s"
+    database_df = pd.read_sql_query(query, engine, params=(selected_date_for_sql,))
     return database_df
 
 st.subheader('Select a previous Friday to explore past coverage...')
@@ -130,10 +125,13 @@ top_artists_reach = df.groupby('Artist').agg({
 sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
 
 # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
-results_with_playlist = sorted_top_artists_reach.head(5)
+results_with_playlist = sorted_top_artists_reach.head(5).copy()
 
-# Convert 'Playlist' list to a string for each artist
-results_with_playlist.loc[:, 'Playlist_str'] = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
+# Calculate the 'Playlist_str' values using an intermediate step
+playlist_str_series = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
+
+# Assign the calculated series to the DataFrame explicitly
+results_with_playlist['Playlist_str'] = playlist_str_series
 
 # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()

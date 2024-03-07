@@ -1,5 +1,4 @@
 # Import necessary libraries
-import streamlit as st
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import pandas as pd

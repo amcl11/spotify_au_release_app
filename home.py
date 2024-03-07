@@ -5,6 +5,22 @@ from datetime import datetime
 import json
 import plotly.express as px
 
+import streamlit.components.v1 as components
+# Your Google Analytics tracking code
+google_analytics_tracking_code = '''
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C9BR7TX9PC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C9BR7TX9PC');
+</script>
+'''
+
+# Embed the tracking code at the beginning of your Streamlit app
+components.html(google_analytics_tracking_code, height=0, width=0)
+
 # Define a function to load the CSV data and decorate it with st.cache_data
 @st.cache_data
 def load_data(filepath):

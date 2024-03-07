@@ -1,34 +1,36 @@
 import streamlit as st
+import os
 import pandas as pd
-import sqlite3
 import plotly.express as px
+from sqlalchemy import create_engine
 
+DATABASE_URL = os.environ['DATABASE_URL']
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-st.subheader('If an artist has had multiple releases since 23rd February 2024, you can compare release coverage here.')
-st.write('*This site only tracks releases that were added to NMF AU & NZ*')
+engine = create_engine(DATABASE_URL)
+
 # Function to fetch all data for artists with more than one unique title
 @st.cache_data
 def fetch_artists_for_selectbox():
-    conn = sqlite3.connect('spotify_nmf_data.db')
     query = """
-    SELECT Artist
+    SELECT "Artist"
     FROM nmf_spotify_coverage 
-    GROUP BY Artist 
-    HAVING COUNT(DISTINCT Title) > 1
+    GROUP BY "Artist" 
+    HAVING COUNT(DISTINCT "Title") > 1
     """
-    artists_df = pd.read_sql_query(query, conn)
-    conn.close()
+    artists_df = pd.read_sql_query(query, engine)
     return artists_df['Artist'].tolist()
 
 # Function to fetch all available data for a selected artist
 @st.cache_data
 def fetch_data_for_selected_artist(artist_name):
-    conn = sqlite3.connect('spotify_nmf_data.db')
-    query = "SELECT * FROM nmf_spotify_coverage WHERE Artist = ?"
-    artist_data_df = pd.read_sql_query(query, conn, params=(artist_name,))
-    conn.close()
+    query = 'SELECT * FROM nmf_spotify_coverage WHERE "Artist" = %s'
+    artist_data_df = pd.read_sql_query(query, engine, params=(artist_name,))
     return artist_data_df
 
+st.subheader('If an artist has had multiple releases since 23rd February 2024, you can compare release coverage here.')
+st.write('*This site only tracks releases that were added to NMF AU & NZ*')
 st.write('--------------')
 # Populate a selectbox with artist names
 artists = fetch_artists_for_selectbox()
@@ -39,7 +41,6 @@ if selected_artist:
     artist_data = fetch_data_for_selected_artist(selected_artist)
 
 # Decide logic with 'artist_data' 
-
 # Get the total followers for each title
 total_followers_per_title = artist_data.groupby('Title')['Followers'].sum().reset_index()
     
