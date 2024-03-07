@@ -277,5 +277,4 @@ for location in ['left', 'right', 'top', 'bottom']:
 
 st.pyplot(fig)
 
-streamlit_analytics.stop_tracking()
-streamlit_analytics.track(save_to_json="analytics.json")
+
