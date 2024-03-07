@@ -2,6 +2,7 @@
 
 This site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial Spotify AU playlists.
 
+[new-music-playlist-tracker-au.streamlit.app/]('https://new-music-playlist-tracker-au.streamlit.app/')
 
 ## List of playlists currently checking: 
 
