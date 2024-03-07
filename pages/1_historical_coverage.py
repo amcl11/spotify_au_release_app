@@ -123,7 +123,7 @@ sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascendi
 results_with_playlist = sorted_top_artists_reach.head(5)
 
 # Convert 'Playlist' list to a string for each artist
-results_with_playlist['Playlist_str'] = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
+results_with_playlist.loc[:, 'Playlist_str'] = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
 
 # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()

@@ -1,4 +1,27 @@
+# Security
 api_credentials.py
-__pycache__
-.cache
+.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# macOS system files
 .DS_Store
+
+# Virtual environment
+venv/
+env/
+
+# Cache directories
+.cache/
+
+# Log files
+log.txt
+
+# Local database files
+*.db
+*.sqbpro

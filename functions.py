@@ -1,7 +1,7 @@
 # Import necessary libraries
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from api_credentials import client_id, client_secret
+from api_credentials import CLIENT_ID, CLIENT_SECRET
 import pandas as pd
 import json
 import re
@@ -17,7 +17,7 @@ with open('playlists.json', 'r') as file:
     playlists_dict = json.load(file)
 
 # Initialise the Spotify client with client credentials for public data access
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 import logging
