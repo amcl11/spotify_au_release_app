@@ -1,11 +1,10 @@
 import streamlit as st
 import os
 from sqlalchemy import create_engine
+import psycopg2
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
-pd.options.mode.chained_assignment = None  # default='warn'
-
 
 DATABASE_URL = os.environ['DATABASE_URL']
 if DATABASE_URL.startswith("postgres://"):

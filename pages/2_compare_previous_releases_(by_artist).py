@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import plotly.express as px
 from sqlalchemy import create_engine
+import psycopg2
+
 
 DATABASE_URL = os.environ['DATABASE_URL']
 if DATABASE_URL.startswith("postgres://"):
