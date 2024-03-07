@@ -1,13 +1,14 @@
 # Security
-api_credentials.py
 .env
+.streamlit/secrets.toml
 
 # Python cache files
 __pycache__/
 *.py[cod]
 
-# Jupyter Notebook checkpoints
+# Jupyter Notebook checkpoints and files
 .ipynb_checkpoints/
+data_check.ipynb
 
 # macOS system files
 .DS_Store
@@ -25,3 +26,5 @@ log.txt
 # Local database files
 *.db
 *.sqbpro
+
+

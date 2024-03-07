@@ -1,12 +1,16 @@
 # Import necessary libraries
+import streamlit as st
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from api_credentials import CLIENT_ID, CLIENT_SECRET
 import pandas as pd
 from functions import get_playlist_tracks_and_artists, find_tracks_positions_in_playlists
 import json
 import re
 import logging 
+
+# Use Streamlit's st.secrets to get the secret values
+CLIENT_ID = st.secrets["CLIENT_ID"]
+CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
 
 # Load list of playlists from JSON file
 with open('playlists.json', 'r') as file:
