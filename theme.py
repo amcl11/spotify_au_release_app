@@ -1,14 +1,7 @@
 import streamlit as st
 
 def set_theme():
-    """Set the theme for the Streamlit app."""
-    st.set_page_config(
-        page_title="Your App Name",
-        page_icon=":smiley:",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
-
+  
     st.markdown(
         """
         <style>
