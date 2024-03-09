@@ -230,7 +230,7 @@ fig.update_layout(
     yaxis_title="Total Reach",
     yaxis=dict(type='linear'),
     xaxis_tickangle=-30,
-    plot_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0)',
     margin=dict(t=100),
     title=dict(
         text='Top 5 Highest Reach',
