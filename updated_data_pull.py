@@ -15,9 +15,6 @@ import psycopg2
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
-# CLIENT_ID = '8784eaf200a34094a36bacc773013d99'
-# CLIENT_SECRET = '7a8875d222bc4ec58463d29de92de13e'
-
 # Load list of playlists from JSON file
 with open('playlists.json', 'r') as file:
     playlists_dict = json.load(file)
