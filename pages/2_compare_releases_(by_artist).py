@@ -38,7 +38,7 @@ st.write('--------------')
 artists = fetch_artists_for_selectbox()
 
 
-selected_artist = st.selectbox('Select an Artist to compare their tracks:', artists)
+selected_artist = st.selectbox('Select artist to compare their releases:', artists)
 
 # Fetch and display data for the selected artist
 if selected_artist:
