@@ -42,8 +42,8 @@ def set_theme():
 
         /* Sidebar background */
         .stSidebar > div:first-child {
-            background-color: #000000;
-            color: #FAFAFA;
+            background-color: #055483;
+            color: #055483;
         }
 
         /* Sidebar headings */
@@ -54,24 +54,24 @@ def set_theme():
 
         /* Sidebar widgets */
         .stSidebar .stSelectbox .css-2b097c-container {
-            background-color: #000000;
-            color: #FAFAFA;
+            background-color: #055483;
+            color: #055483;
         }
 
         /* Adjust selectbox dropdown color */
         .stSelectbox .css-1okebmr-indicatorSeparator, .stSelectbox .css-1hwfws3 {
-            background-color: #FAFAFA;
+            background-color: #055483;
         }
 
         /* Adjust selectbox text and arrow color */
         .stSelectbox .css-1uccc91-singleValue, .stSelectbox .css-1gtu0rj-indicatorContainer {
-            color: #FAFAFA;
+            color: #055483;
         }
 
         /* Button styles in sidebar */
         .stSidebar .stButton button {
             background-color: #055483;
-            color: #FAFAFA;
+            color: #055483;
         }
         </style>
         """,
