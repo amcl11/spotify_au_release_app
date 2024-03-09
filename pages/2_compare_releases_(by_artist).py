@@ -36,6 +36,8 @@ st.write('*This site only tracks releases that were added to NMF AU & NZ*')
 st.write('--------------')
 # Populate a selectbox with artist names
 artists = fetch_artists_for_selectbox()
+
+
 selected_artist = st.selectbox('Select an Artist to compare their tracks:', artists)
 
 # Fetch and display data for the selected artist
@@ -53,7 +55,8 @@ titles_of_interest = artist_data['Title'].unique()
 # Use this order for the x-axis order in the plot
 artist_data_filtered = artist_data[artist_data['Title'].isin(titles_of_interest)]
 
-# st.dataframe(artist_data_filtered) # for viewing data for now 
+# For viewing DF if needed
+# st.dataframe(artist_data_filtered) 
 
 total_playlist_adds = artist_data_filtered.groupby('Title')['Playlist'].nunique()
 

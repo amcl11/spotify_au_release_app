@@ -8,11 +8,11 @@ import re
 import logging 
 import os
 
-# Fetch API key and secret key from environment variables
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-
-
+# # Fetch API key and secret key from environment variables
+# CLIENT_ID = os.getenv('CLIENT_ID')
+# CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+CLIENT_ID = '8784eaf200a34094a36bacc773013d99'
+CLIENT_SECRET = '7a8875d222bc4ec58463d29de92de13e'
 # # Use Streamlit's st.secrets to get the secret values
 # CLIENT_ID = st.secrets["CLIENT_ID"]
 # CLIENT_SECRET = st.secrets["CLIENT_SECRET"]

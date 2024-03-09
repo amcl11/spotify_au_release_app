@@ -62,10 +62,7 @@ col1, col2 = st.columns([3, 4])
 # Display the image with a specific width
 with col1:
     st.image(nmf_image_url, width=300)
-
-
-
-
+    
 # col1, col2, col3 = st.columns([300, 0.5, 0.5])  
 
 st.markdown(
@@ -78,9 +75,7 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-
 ##########################################################
-
 # Most Added Artists
 # Count the occurrences of each artist
 artist_counts = df['Artist'].value_counts()
@@ -90,7 +85,7 @@ artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artist
 with col2:
     st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
 
-# Highest Follower Count
+# Highest Reach
 # Sum the followers count for each artist
 artist_followers = df.groupby('Artist')['Followers'].sum()
 
@@ -106,7 +101,7 @@ artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_a
 with col2:
     st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across playlist adds. Only based on the tracked playlists.', delta_color='normal')
 
-# Artist with the highest average playlist positioning 
+# Highest Average Playlist Position 
 avg_position = df.groupby('Artist')['Position'].mean()
 best_avg_playlist_position_by_artist = avg_position.idxmin()
 best_avg = avg_position.min()
@@ -172,12 +167,6 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 ##########################################################
-
-
-
-
-
-
 
 st.write('- - - - - -')
 st.subheader('Search Adds By Song:')

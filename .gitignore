@@ -7,8 +7,8 @@ __pycache__
 *.py[cod]
 
 # Jupyter Notebook checkpoints and files
-.ipynb_checkpoints
-data_check.ipynb
+*.ipynb_checkpoints
+*.ipynb
 
 # macOS system files
 .DS_Store
