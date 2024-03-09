@@ -8,7 +8,7 @@ from theme import set_theme
 from sqlalchemy import create_engine, text
 import os
 
-set_theme()
+# set_theme()
 
 # Setup DATABASE_URL and engine
 DATABASE_URL = os.getenv('DATABASE_URL')
