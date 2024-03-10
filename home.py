@@ -28,7 +28,7 @@ def get_most_added_artist(engine):
     SELECT "Artist", COUNT(*) AS count
     FROM nmf_spotify_coverage
     WHERE "Date" = (SELECT MAX("Date") FROM nmf_spotify_coverage)
-    GROUP BY "Artist"
+    GROUP BY "Artist", "Title"
     ORDER BY count DESC
     """
     df = pd.read_sql(query, engine)
@@ -50,7 +50,7 @@ def get_highest_reach(engine):
         SELECT "Artist", SUM("Followers") AS total_followers
         FROM nmf_spotify_coverage, LatestDate
         WHERE "Date" = LatestDate.max_date
-        GROUP BY "Artist"
+        GROUP BY "Artist", "Title"
     ), MaxFollowers AS (
         SELECT MAX(total_followers) AS max_followers
         FROM ArtistFollowers
@@ -133,7 +133,7 @@ def load_db_for_most_recent_date():
     return database_df
 
 left_column, middle_column, right_column = st.columns(3)
-left_column.image('images/nmf_logo.png')
+left_column.image('images/nmf_logo_transparent_background.png')
 
 todays_date = datetime.now().strftime("%A, %d %B, %Y")  # Format the date as Weekday, Day, Month, Year
 right_column.write(todays_date)
@@ -189,7 +189,7 @@ with col1:
 df = load_db_for_most_recent_date()
 # st.dataframe(df)
 
-top_artists_reach = df.groupby('Artist').agg({
+top_artists_reach = df.groupby(['Artist', 'Title']).agg({
     'Followers': 'sum',
     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
 })
@@ -217,7 +217,7 @@ fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              text='Followers',
              hover_data=['Playlist_str'],  # Add 'Playlist_str' to hover data
              color='Followers',  # Assign color based on 'Followers' values
-             color_continuous_scale=color_scale  # Use the custom color scale
+             color_continuous_scale=color_scale  # Use custom color scale
              )
 
 # Custom hover template to include Playlist information
@@ -336,12 +336,18 @@ st.write('- - - - - -')
 # Calculate the number of adds per playlist and sort for plotting
 adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
 
-# Setting the style for the plot
-plt.style.use('dark_background')  # Use a dark background style
+# # Setting the style for the plot
+
+plt.style.use('dark_background')  # This sets the background to dark
 
 # Plotting
-fig, ax = plt.subplots(figsize=(6, 8))  # Adjust figure size for readability
+fig, ax = plt.subplots(figsize=(6, 8), facecolor= '#0E1117')  # Adjust figure size for readability
 adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
+
+fig.patch.set_facecolor('#0E1117')
+ax.set_facecolor('#0E1117')
+fig.patch.set_facecolor('#0E1117')
+ax.set_facecolor('#0E1117')
 
 # Customize tick parameters for better legibility
 ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
@@ -368,5 +374,7 @@ for location in ['left', 'right', 'top', 'bottom']:
     ax.spines[location].set_visible(False)
 
 st.pyplot(fig)
+
+
 
 
