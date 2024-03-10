@@ -1,8 +1,10 @@
-# New Release Playlist Tracker (AU) 
-### This app tracks key AU Editorial playlists. 
-#### Providing a snapshot of Friday's release peprformance.   
+# New Music - Spotify Playlists Tracker (AU) 
+### This app tracks key AU Editorial playlists on Spotify. 
+#### Providing a snapshot of Friday's release performance.   
 
-This site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial Spotify/Non Spotify AU playlists.
+[https://new-music-playlist-tracker-c480db72347d.herokuapp.com/]('https://new-music-playlist-tracker-c480db72347d.herokuapp.com/')
+
+The site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial Spotify/Non Spotify AU playlists.
 
 ## List of playlists currently checking: 
 
