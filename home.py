@@ -175,6 +175,7 @@ with col1:
 # Retrieve Best Average By Artist
 best_avg_playlist_position_by_artist, best_avg = highest_average_position(engine)
 
+
 # Set Best Average Playlist Position
 with col1:
     st.metric(label="Highest Average Playlist Position", 

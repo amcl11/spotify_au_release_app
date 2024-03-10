@@ -103,14 +103,21 @@ for playlist_name, playlist_id in playlists_dict.items():
     # Extract the required information
     playlist_description = playlist.get('description', 'No description available')
 
-    # Use regex for case-insensitive search for 'Cover: ' and extract the cover artist name
-    match = re.search(r'cover:\s*(.*?)$', playlist_description, re.IGNORECASE)
-    if match:
-        cover_artist = match.group(1)  # Extract the matched artist name
+    # Define regex patterns
+    # Case-insensitive 
+    patterns = [
+        r'cover:\s*(.*?)$',  # Pattern for "Cover: artist_name"
+        r'\.\s*([^\.]+)$'    # Pattern for "sentence. artist_name", as a fallback
+    ]
 
-        # Add to the dictionary only if the cover artist is meaningful (not 'No cover artist found')
-        if cover_artist.strip().lower() != "no cover artist found":
-            cover_artist_dict[playlist_name] = cover_artist
+    cover_artist = None
+    for pattern in patterns:
+        match = re.search(pattern, playlist_description, re.IGNORECASE)
+        if match:
+            cover_artist = match.group(1).strip()
+            if cover_artist and cover_artist.lower() != "no cover artist found":
+                cover_artist_dict[playlist_name] = cover_artist
+                break  # If a valid cover artist is found, stop looking through other patterns
 logging.info("Cover artist details returned successfully  ")
 
 
