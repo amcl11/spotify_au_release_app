@@ -5,3 +5,5 @@ spotipy==2.23.0
 streamlit==1.31.1
 SQLAlchemy==1.4.39
 psycopg2==2.9.7
+beautifulsoup4==4.12.2
+

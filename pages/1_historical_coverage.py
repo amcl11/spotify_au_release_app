@@ -63,8 +63,6 @@ col1, col2 = st.columns([3, 4])
 with col1:
     st.image(nmf_image_url, width=300)
     
-# col1, col2, col3 = st.columns([300, 0.5, 0.5])  
-
 st.markdown(
     """
 <style>
@@ -77,29 +75,54 @@ st.markdown(
 )
 ##########################################################
 # Most Added Artists
-# Count the occurrences of each artist
-artist_counts = df['Artist'].value_counts()
-max_adds = artist_counts.max()
-most_added_artists = artist_counts[artist_counts == max_adds].index.tolist()
-artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1] if len(most_added_artists) > 1 else most_added_artists[0]
+# Group by 'Title' and count the occurrences
+title_counts = df.groupby('Title').size()
+
+# Find the max number of adds
+max_adds = title_counts.max()
+
+# Find the title(s) with the max number of adds
+most_added_titles = title_counts[title_counts == max_adds].index.tolist()
+
+# Filter the original DataFrame to get the artist(s) for the most added title(s)
+most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(subset=['Title', 'Artist'])
+
+# Format the artist names
+if len(most_added_artists_df) > 1:
+    artist_names = " & ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " and " + most_added_artists_df['Artist'].tolist()[-1]
+else:
+    artist_names = most_added_artists_df['Artist'].iloc[0]
+
+# Display the result
 with col2:
     st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
 
+
 # Highest Reach
-# Sum the followers count for each artist
-artist_followers = df.groupby('Artist')['Followers'].sum()
+# Group by 'Title' and sum the 'Followers' for each title
+title_followers = df.groupby('Title')['Followers'].sum()
 
-# Find the maximum followers count
-max_followers = artist_followers.max()
+# Find the maximum followers count for a title
+max_followers = title_followers.max()
 
-# Find all artists with the highest followers count
-most_reach_artists = artist_followers[artist_followers == max_followers].index.tolist()
+# Find the title(s) with the maximum followers count
+title_with_max_followers = title_followers[title_followers == max_followers].index.tolist()
 
-# Format the artist names for display
-artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1] if len(most_reach_artists) > 1 else most_reach_artists[0]
+# Assuming each title is associated with a single artist, filter to find the artist for the top title
+# If a title could be associated with multiple artists, this approach would need to be adjusted
+most_reach_title_df = df[df['Title'].isin(title_with_max_followers)].drop_duplicates(subset=['Title', 'Artist'])
 
+# Format the artist names
+if len(most_reach_title_df) > 1:
+    artist_names_reach = ", ".join(most_reach_title_df['Artist'].tolist()[:-1]) + " and " + most_reach_title_df['Artist'].tolist()[-1]
+else:
+    artist_names_reach = most_reach_title_df['Artist'].iloc[0]
+
+# Display the result
 with col2:
     st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across playlist adds. Only based on the tracked playlists.', delta_color='normal')
+
+
 
 # Highest Average Playlist Position 
 avg_position = df.groupby('Artist')['Position'].mean()

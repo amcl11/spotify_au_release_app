@@ -336,18 +336,14 @@ st.write('- - - - - -')
 # Calculate the number of adds per playlist and sort for plotting
 adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
 
-# # Setting the style for the plot
-
-plt.style.use('dark_background')  # This sets the background to dark
+# Setting the style for the plot
 
 # Plotting
 fig, ax = plt.subplots(figsize=(6, 8), facecolor= '#0E1117')  # Adjust figure size for readability
 adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
 
-fig.patch.set_facecolor('#0E1117')
 ax.set_facecolor('#0E1117')
 fig.patch.set_facecolor('#0E1117')
-ax.set_facecolor('#0E1117')
 
 # Customize tick parameters for better legibility
 ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
@@ -375,6 +371,46 @@ for location in ['left', 'right', 'top', 'bottom']:
 
 st.pyplot(fig)
 
+# # Plotly version 
+# fig = px.bar(adds_per_playlist, orientation='h', 
+#              color=adds_per_playlist.values, color_continuous_scale=['#ab47bc', '#ab47bc'],
+#              text=adds_per_playlist.values)
 
+# # Customize layout
+# fig.update_layout(
+#     plot_bgcolor='#0E1117',  # Set the background color of the plot
+#     paper_bgcolor='#0E1117', # Set the background color surrounding the plot
+#     font_color="white",      # Set the color of all text in the plot
+#     title={
+#         'text': "Adds By Playlist",
+#         'y':0.9,
+#         'x':0.05,
+#         'xanchor': 'left',
+#         'yanchor': 'top'
+#     },
+#     xaxis_title="",
+#     xaxis=dict(
+#         showgrid=False,  # Hide the grid
+#         tickmode = 'array',
+#         tickvals = [10, 20, 30, 40, 50, 60, 70, 80],
+#         ticktext = [10, 20, 30, 40, 50, 60, 70, 80]
+#     ),
+#     yaxis=dict(
+#         showgrid=False,  # Hide the grid
+#         tickmode = 'array',
+#         tickvals = adds_per_playlist.index,
+#         ticktext = adds_per_playlist.index
+#     ),
+#     coloraxis_showscale=False,  # Hide color scale
+# )
 
+# fig.update_traces(textangle= 45)  # Rotate bar text labels 
+
+# # Remove axis lines
+# fig.update_xaxes(showline=False, linewidth=0)
+# fig.update_yaxes(showline=False, linewidth=0)
+
+# # Display the figure
+# fig.show()
+# st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
