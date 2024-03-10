@@ -2,7 +2,9 @@
 ### This app tracks key AU Editorial playlists on Spotify. 
 #### Providing a snapshot of Friday's release performance.   
 
-[https://new-music-playlist-tracker-c480db72347d.herokuapp.com/]('https://new-music-playlist-tracker-c480db72347d.herokuapp.com/')
+
+[New Music Playlist Tracker](https://new-music-playlist-tracker-c480db72347d.herokuapp.com/)
+
 
 The site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial Spotify/Non Spotify AU playlists.
 

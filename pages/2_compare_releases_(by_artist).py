@@ -34,9 +34,9 @@ def fetch_data_for_selected_artist(artist_name):
 st.subheader('If an artist has had multiple releases since 23rd February 2024, you can compare release coverage here.')
 st.write('*This site only tracks releases that were added to NMF AU & NZ*')
 st.write('--------------')
+
 # Populate a selectbox with artist names
 artists = fetch_artists_for_selectbox()
-
 
 selected_artist = st.selectbox('Select artist to compare their releases:', artists)
 
@@ -44,7 +44,6 @@ selected_artist = st.selectbox('Select artist to compare their releases:', artis
 if selected_artist:
     artist_data = fetch_data_for_selected_artist(selected_artist)
 
-# Decide logic with 'artist_data' 
 # Get the total followers for each title
 total_followers_per_title = artist_data.groupby('Title')['Followers'].sum().reset_index()
     
@@ -52,6 +51,7 @@ total_followers_per_title = artist_data.groupby('Title')['Followers'].sum().rese
 sorted_titles = total_followers_per_title.sort_values(by='Followers', ascending=False)['Title']
 
 titles_of_interest = artist_data['Title'].unique()
+
 # Use this order for the x-axis order in the plot
 artist_data_filtered = artist_data[artist_data['Title'].isin(titles_of_interest)]
 

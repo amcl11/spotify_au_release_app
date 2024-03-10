@@ -23,8 +23,10 @@ env
 # Log files
 log.txt
 
-# Local database files
+# Database files
 *.db
 *.sqbpro
+*.sql
 
+user_input.json
 

@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO,
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
-# Initialise the Spotify client with client credentials for public data access
+# Initialise the Spotify client with client credentials 
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
@@ -86,6 +86,7 @@ def find_tracks_positions_in_playlists(sp, track_details, playlists_dict):
             for position, (track_name, artist_names) in enumerate(playlist_tracks, start=1):
                 key = (track_name, artist_names)
                 if key in track_info_dict:
+                    
                     # Record the playlist and position for each matching track
                     track_info_dict[key]['playlists'].append({
                         'playlist': playlist_name,
@@ -146,7 +147,7 @@ def update_popularity(artist_title):
             logging.info(f"No results for {artist_title}")
     except Exception as e:
         logging.error(f"Error fetching data for {artist_title}: {e}")
-        sleep(1)  # Simple backoff strategy
+        sleep(1)  # Backoff strategy
     return None  # Return None or a default value for missing/incorrect data
 
 def apply_update_popularity(row):
@@ -154,19 +155,18 @@ def apply_update_popularity(row):
     return update_popularity(row['Artist_Title'])
 
 
-# Function to check if the last entry in the CSV matches today's date
-def is_latest_entry_today(csv_path, today_date):
-    if os.path.exists(csv_path):
-        # Read the last few lines of the file to find the latest date
-        with open(csv_path, 'r') as file:
-            last_line = None
-            for last_line in (line for line in file if line.rstrip('\n')):
-                pass
-            if last_line:
-                # Assuming the date is the first column
-                last_date = last_line.split(',')[0]
-                return last_date == today_date
-    return False
+# # Function to check if the last entry in the CSV matches today's date
+# def is_latest_entry_today(csv_path, today_date):
+#     if os.path.exists(csv_path):
+#         # Read the last few lines of the file to find the latest date
+#         with open(csv_path, 'r') as file:
+#             last_line = None
+#             for last_line in (line for line in file if line.rstrip('\n')):
+#                 pass
+#             if last_line:
+#                 last_date = last_line.split(',')[0]
+#                 return last_date == today_date
+#     return False
 
 
 # Function to load the JSON file into a DataFrame before merging and storing in SQL db

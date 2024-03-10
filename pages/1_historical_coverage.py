@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px
 
+# Set db connection
 DATABASE_URL = os.environ['DATABASE_URL']
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -43,16 +44,16 @@ unique_dates = fetch_unique_dates()
 
 st.write('- - - - - -')
 
-# Let the user select a date
+# User selects a date
 selected_date_format = st.selectbox("Select a Friday", options=unique_dates)
 
-# Convert the selected date back to the original format for SQL query
+# Convert selected date back to the original format for SQL query
 selected_date_for_sql = datetime.strptime(selected_date_format, "%A %d %B %Y").strftime("%Y-%m-%d")
 
-# Load the data for the selected date
+# Load data for the selected date
 df = load_db(selected_date_for_sql)
 
-# Filter the dataframe to get the row with the "New Music Friday AU & NZ" playlist
+# Filter dataframe to get the row with the "New Music Friday AU & NZ" playlist
 nmf_image_series = df[df['Playlist'] == "New Music Friday AU & NZ"]['Image_URL']
 
 # Extract the first image URL from the series
@@ -108,20 +109,18 @@ max_followers = title_followers.max()
 # Find the title(s) with the maximum followers count
 title_with_max_followers = title_followers[title_followers == max_followers].index.tolist()
 
-# Assuming each title is associated with a single artist, filter to find the artist for the top title
-# If a title could be associated with multiple artists, this approach would need to be adjusted
+# Filter to find the artist for the top title
 most_reach_title_df = df[df['Title'].isin(title_with_max_followers)].drop_duplicates(subset=['Title', 'Artist'])
 
-# Format the artist names
+# Format artist names
 if len(most_reach_title_df) > 1:
     artist_names_reach = ", ".join(most_reach_title_df['Artist'].tolist()[:-1]) + " and " + most_reach_title_df['Artist'].tolist()[-1]
 else:
     artist_names_reach = most_reach_title_df['Artist'].iloc[0]
 
-# Display the result
+# Display result
 with col2:
     st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across playlist adds. Only based on the tracked playlists.', delta_color='normal')
-
 
 
 # Highest Average Playlist Position 
@@ -138,25 +137,25 @@ top_artists_reach = df.groupby('Artist').agg({
     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
 })
 
-# Sort the DataFrame based on 'Followers' while maintaining the whole DataFrame
+# Sort DataFrame based on 'Followers' while maintaining the whole DataFrame
 sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
 
 # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
 results_with_playlist = sorted_top_artists_reach.head(5).copy()
 
-# Calculate the 'Playlist_str' values using an intermediate step
+# Calculate the 'Playlist_str' values 
 playlist_str_series = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
 
 # Assign the calculated series to the DataFrame explicitly
 results_with_playlist['Playlist_str'] = playlist_str_series
 
-# Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
+# Ensure 'Artist' is a column for Plotly
 results_with_playlist = results_with_playlist.reset_index()
 
-# Create a color scale
+# Create colour scale
 color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
 
-# Create a bar chart using Plotly Express
+# Create bar chart with Plotly Express
 fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              text='Followers',
              hover_data=['Playlist_str'],  # Add 'Playlist_str' to hover data
@@ -183,7 +182,7 @@ fig.update_layout(
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
 ),
-    coloraxis_showscale=False  # Optionally hide the color scale legend
+    coloraxis_showscale=False  # Hide the color scale legend
     
     )
 # Display the figure in Streamlit
@@ -223,6 +222,7 @@ st.subheader('Search Adds By Playlist:')
 playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
 
 selected_playlist = st.selectbox('Select a Playlist:', playlist_choices, key='playlist_select')
+
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 

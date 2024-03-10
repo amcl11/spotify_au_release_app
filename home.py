@@ -8,7 +8,7 @@ from theme import set_theme
 from sqlalchemy import create_engine, text
 import os
 
-# set_theme()
+# set_theme() # Backup option if config theme setting don't work
 
 # Setup DATABASE_URL and engine
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -157,7 +157,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 ##########################################################
-##########################################################
 # Retrieve Most Added
 artist_names, max_adds = get_most_added_artist(engine)
 
@@ -231,7 +230,7 @@ fig.update_layout(
     yaxis=dict(type='linear'),
     xaxis_tickangle=-30,
     # plot_bgcolor='rgba(0,0,0)',
-    # paper_bgcolor='rgb(0,0,0)',  # Pitch black paper background for the entire figure
+    # paper_bgcolor='rgb(0,0,0)',  # black paper background for the entire figure
     margin=dict(t=100),
     title=dict(
         text='Top 5 Highest Reach',
@@ -240,7 +239,7 @@ fig.update_layout(
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
 ),
-    coloraxis_showscale=False  # Optionally hide the color scale legend
+    coloraxis_showscale=False  # Optionally hide color scale legend
     
     )
 # Display the figure in Streamlit
@@ -282,6 +281,7 @@ st.subheader('Search Adds By Playlist:')
 playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
 
 selected_playlist = st.selectbox('Select a Playlist:', playlist_choices, key='playlist_select')
+
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 
@@ -298,7 +298,6 @@ st.dataframe(cover_artist_df, use_container_width=True, hide_index=True)
 
 
 st.write('- - - - - -') 
-
 ##########################################################
 
 
@@ -314,8 +313,9 @@ cols = [col1, col2, col3]
 # Total number of playlists
 total_playlists = len(cover_art_dict)
 
-# Iterate over your dictionary items
+# Iterate over dictionary items
 for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
+    
     # Get the artist name using the playlist name from the cover_artist_name_dict
     artist_name = cover_artist_dict.get(playlist_name, "Artist Unknown")
     
