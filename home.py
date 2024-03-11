@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import plotly.express as px
 from theme import set_theme
@@ -123,7 +123,7 @@ def fetch_unique_dates():
     return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
 
 # Function to load database data based on most recent 'Date'
-@st.cache_data
+# @st.cache_data # Removed caching - Was effecting db update post triple j adds
 def load_db_for_most_recent_date():
     query = """
     SELECT * FROM nmf_spotify_coverage
@@ -135,14 +135,60 @@ def load_db_for_most_recent_date():
 left_column, middle_column, right_column = st.columns(3)
 left_column.image('images/nmf_logo_transparent_background.png')
 
-todays_date = datetime.now().strftime("%A, %d %B, %Y")  # Format the date as Weekday, Day, Month, Year
-right_column.write(todays_date)
+# Don't really need today's date 
+# todays_date = datetime.now().strftime("%A, %d %B, %Y")  # Format the date as Weekday, Day, Month, Year
+# right_column.write(todays_date)
 
 st.title('New Release Playlist Adds:')
 st.write('---')  # Add a visual separator
 st.write('This site pulls all songs added to *New Music Friday AU & NZ*, and then checks to see if these songs have also been added to any key Australian editorial playlists.')  
 st.write('For more info and the list of playlists that are tracked, check the About page.')  
 st.write('---')  # Add a visual separator
+
+##################################
+# DISPLAY MOST RECENT FRIDAY DATE
+##################################
+
+# Get the current datetime
+now = datetime.now()
+# Determine the current day of the week (0=Monday, 6=Sunday)
+weekday = now.weekday()
+
+# Calculate the days to subtract to get the most recent Friday
+days_to_subtract = (weekday - 4) % 7
+most_recent_friday = now - timedelta(days=days_to_subtract)
+
+# Create a custom function to format the day with the suffix
+def add_suffix_to_day(day):
+    return f"{day}{('th' if 11 <= day <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th'))}"
+
+# Format the most recent Friday date
+day_with_suffix = add_suffix_to_day(most_recent_friday.day)
+most_recent_friday_str = most_recent_friday.strftime(f"Friday {day_with_suffix} %B, %Y")
+
+# Display the most recent Friday as a subheader in the Streamlit app
+st.subheader(most_recent_friday_str)
+
+# # Get the current datetime
+# now = datetime.now()
+# # Determine the current day of the week (0=Monday, 6=Sunday)
+# weekday = now.weekday()
+
+# # Calculate the days to subtract to get the most recent Friday
+# if weekday == 6:  # Sunday
+#     days_to_subtract = 2
+# elif weekday == 0:  # Monday
+#     days_to_subtract = 3
+# else:  # Tuesday (1) to Saturday (5)
+#     days_to_subtract = weekday - 4
+
+# # Subtract the calculated days from the current date to get the most recent Friday
+# most_recent_release_day = now - timedelta(days=days_to_subtract)
+# # Format the date as a string
+# most_recent_release_day_str = most_recent_release_day.strftime("%A %d %B %Y")
+
+# # Display the most recent Friday 
+# st.subheader(most_recent_release_day_str)
 
 col1, col2, col3 = st.columns([300, 0.5, 0.5])  
 
@@ -185,9 +231,11 @@ with col1:
               help='Averages all positions across any new playlist additions')
 
 ########################################################## 
+# TOP 5 HIGHEST REACH CHART
+########################################################## 
+
 # # Display the data for the most recent date
 df = load_db_for_most_recent_date()
-# st.dataframe(df)
 
 top_artists_reach = df.groupby(['Artist', 'Title']).agg({
     'Followers': 'sum',
@@ -247,10 +295,9 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 ##########################################################
-
+# SEARCH ADDS BY SONG
 ##########################################################
 
-st.write('- - - - - -')
 st.subheader('Search Adds By Song:')
 
 # Combine Artist & Title for the first dropdown box: 
@@ -261,7 +308,7 @@ choices = df['Artist_Title'].unique()
 sorted_choices = sorted(choices, key=lambda x: x.lower())
 
 # Dropdown for user to select an artist and title
-selected_artist_title = st.selectbox('Select a release:', sorted_choices)
+selected_artist_title = st.selectbox('Select New Release:', sorted_choices)
 
 # Filter DataFrame based on selection, then drop unnecessary columns for display
 filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
@@ -275,13 +322,15 @@ ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
 
-st.write('- - - - - -') 
-
+##########################################################
+# SEARCH ADDS BY PLAYLIST
+##########################################################
+st.write("")
 st.subheader('Search Adds By Playlist:')
 
 playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
 
-selected_playlist = st.selectbox('Select a Playlist:', playlist_choices, key='playlist_select')
+selected_playlist = st.selectbox('Select Playlist:', playlist_choices, key='playlist_select')
 
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = df[df['Playlist'] == selected_playlist]
@@ -289,36 +338,40 @@ filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 # Display all songs in the selected playlist
 st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
 
+#################################################
+# Cover Artists DataFrame 
+#################################################
 
-# Cover Artists 
-# Display the dictionary in the app
+# Filter out rows where either 'Cover_Artist' or 'Image_URL' is None before grouping
+filtered_df = df.dropna(subset=['Cover_Artist', 'Image_URL'])
+
+new_cover_artist_df = filtered_df.groupby('Playlist').agg({
+    'Image_URL': 'first',
+    'Cover_Artist': 'first'
+}).reset_index()
+
+final_cover_artist_df = new_cover_artist_df[['Playlist', 'Cover_Artist']]
+
 st.subheader('Cover Artists:')
-cover_artist_df = pd.DataFrame(list(cover_artist_dict.items()), columns=['Playlist', 'Cover Artist'])
-st.dataframe(cover_artist_df, use_container_width=True, hide_index=True)
+st.dataframe(final_cover_artist_df, use_container_width=True, hide_index=True)
 
-
-
-st.write('- - - - - -') 
-##########################################################
-
-
+st.write("") # padding 
 st.write("*Note: Cover artist may update before cover images*")
 
-
-# # Playlist packshots
+# Playlist packshots
 col1, col2, col3 = st.columns(3)
 
 # Create a list of columns for easier access
 cols = [col1, col2, col3]
 
 # Total number of playlists
-total_playlists = len(cover_art_dict)
+total_playlists = len(new_cover_artist_df)
 
-# Iterate over dictionary items
-for index, (playlist_name, image_url) in enumerate(cover_art_dict.items()):
-    
-    # Get the artist name using the playlist name from the cover_artist_name_dict
-    artist_name = cover_artist_dict.get(playlist_name, "Artist Unknown")
+# Iterate over DataFrame rows
+for index, row in new_cover_artist_df.iterrows():
+    playlist_name = row['Playlist']
+    artist_name = row['Cover_Artist']
+    image_url = row['Image_URL']
     
     # Check if this is the last image and if the total number is not divisible by 3, put it in col2
     if index == total_playlists - 1 and total_playlists % 3 != 0:

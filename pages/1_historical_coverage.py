@@ -14,7 +14,7 @@ if DATABASE_URL.startswith("postgres://"):
 engine = create_engine(DATABASE_URL)
 
 # Function to fetch unique dates from the database
-@st.cache_data
+# @st.cache_data
 def fetch_unique_dates():
     query = "SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC"
     unique_dates_df = pd.read_sql_query(query, engine)
@@ -31,7 +31,7 @@ def fetch_unique_dates():
 
 
 # Function to load database data based on selected date
-@st.cache_data
+# @st.cache_data - this was hingering updated triple j adds on Monday 
 def load_db(selected_date_for_sql):
     query = "SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = %s"
     database_df = pd.read_sql_query(query, engine, params=(selected_date_for_sql,))
@@ -74,8 +74,10 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-##########################################################
-# Most Added Artists
+#########################################
+# MOST ADDED ARTISTS
+#########################################
+
 # Group by 'Title' and count the occurrences
 title_counts = df.groupby('Title').size()
 
@@ -99,7 +101,10 @@ with col2:
     st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
 
 
-# Highest Reach
+#########################################
+# TOP 5 HIGHEST REACH GRAPH
+#########################################
+
 # Group by 'Title' and sum the 'Followers' for each title
 title_followers = df.groupby('Title')['Followers'].sum()
 
@@ -190,7 +195,6 @@ st.plotly_chart(fig, use_container_width=True)
 
 ##########################################################
 
-st.write('- - - - - -')
 st.subheader('Search Adds By Song:')
 
 # Combine Artist & Title for the first dropdown box: 
@@ -201,7 +205,7 @@ choices = df['Artist_Title'].unique()
 sorted_choices = sorted(choices, key=lambda x: x.lower())
 
 # Dropdown for user to select an artist and title
-selected_artist_title = st.selectbox('Select a release:', sorted_choices)
+selected_artist_title = st.selectbox('Select New Release:', sorted_choices)
 
 # Filter DataFrame based on selection, then drop unnecessary columns for display
 filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
@@ -221,7 +225,7 @@ st.subheader('Search Adds By Playlist:')
 
 playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
 
-selected_playlist = st.selectbox('Select a Playlist:', playlist_choices, key='playlist_select')
+selected_playlist = st.selectbox('Select Playlist:', playlist_choices, key='playlist_select')
 
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = df[df['Playlist'] == selected_playlist]

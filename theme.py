@@ -6,7 +6,7 @@ def set_theme():
         <style>
         /* Main background */
         .stApp {
-            background-color: #000000;
+            background-color: #0E1117;
         }
 
         /* Text color for headings and button in the main app */

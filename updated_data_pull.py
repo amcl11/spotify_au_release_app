@@ -120,7 +120,6 @@ for playlist_name, playlist_id in playlists_dict.items():
                 break  # If a valid cover artist is found, stop looking through other patterns
 logging.info("Cover artist details returned successfully  ")
 
-
 #Remove Image URLs from `cover_art_dict` that don't have a Cover Artist. Only Cover Art featuring an artist is useful. 
 # Create a new dictionary that will only include matching keys
 filtered_cover_art_dict = {}

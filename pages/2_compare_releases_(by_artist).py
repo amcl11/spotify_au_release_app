@@ -31,14 +31,18 @@ def fetch_data_for_selected_artist(artist_name):
     artist_data_df = pd.read_sql_query(query, engine, params=(artist_name,))
     return artist_data_df
 
-st.subheader('If an artist has had multiple releases since 23rd February 2024, you can compare release coverage here.')
-st.write('*This site only tracks releases that were added to NMF AU & NZ*')
+st.subheader('Compare releases by artist:')
+st.write('*Data available from 23rd Feb 2024 onwards*')
+st.markdown(
+    '<p style="font-size: 12px;">*This site only tracks releases that were added to NMF AU & NZ</p>', 
+    unsafe_allow_html=True
+)
 st.write('--------------')
 
 # Populate a selectbox with artist names
 artists = fetch_artists_for_selectbox()
 
-selected_artist = st.selectbox('Select artist to compare their releases:', artists)
+selected_artist = st.selectbox('Select Artist:', artists)
 
 # Fetch and display data for the selected artist
 if selected_artist:
@@ -72,10 +76,22 @@ fig = px.bar(artist_data_filtered,
 # Update the layout for a better visual representation
 fig.update_layout(
     barmode='stack',
-    title="Total Reach on Release (Fri-Wed)",
+    title={
+        'text': "Total Reach on Release (Fri-Wed)",
+        'y':0.9,
+        'x':0.5,  # Centers the title
+        'xanchor': 'center',  # Ensures the center of the title is at x=0.5
+        'yanchor': 'top'
+    },
     xaxis_title="",
     yaxis_title="",
-    legend_title="Playlists"
+    legend_title="Playlists",
+    height=400,  # Specify the desired height of the figure in pixels
+    yaxis=dict(  # Adjust the y-axis ticks
+        # tickmode='linear',  # Set the tick mode to 'linear' to place ticks at regular intervals
+        tick0=0,  # Set the starting tick
+        dtick=500000  # Set the interval between ticks, adjust this value as needed
+    )
     )
     
 # Customize hover data
@@ -86,8 +102,8 @@ fig.update_traces(
                   "<b>Playlist Reach:</b> %{y:,.0f}<br>" + 
                   "<b>Position:</b> %{customdata[0]}<extra></extra>"  # %{customdata[0]} accesses the first item in custom data
 )
-
+st.write('Hover over chart to check playlist position on release.')
 # Show the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True)
-st.write('*Hover over chart to check playlist position on release.*')
+
  
