@@ -166,29 +166,8 @@ def add_suffix_to_day(day):
 day_with_suffix = add_suffix_to_day(most_recent_friday.day)
 most_recent_friday_str = most_recent_friday.strftime(f"Friday {day_with_suffix} %B, %Y")
 
-# Display the most recent Friday as a subheader in the Streamlit app
+# Display the most recent Friday 
 st.subheader(most_recent_friday_str)
-
-# # Get the current datetime
-# now = datetime.now()
-# # Determine the current day of the week (0=Monday, 6=Sunday)
-# weekday = now.weekday()
-
-# # Calculate the days to subtract to get the most recent Friday
-# if weekday == 6:  # Sunday
-#     days_to_subtract = 2
-# elif weekday == 0:  # Monday
-#     days_to_subtract = 3
-# else:  # Tuesday (1) to Saturday (5)
-#     days_to_subtract = weekday - 4
-
-# # Subtract the calculated days from the current date to get the most recent Friday
-# most_recent_release_day = now - timedelta(days=days_to_subtract)
-# # Format the date as a string
-# most_recent_release_day_str = most_recent_release_day.strftime("%A %d %B %Y")
-
-# # Display the most recent Friday 
-# st.subheader(most_recent_release_day_str)
 
 col1, col2, col3 = st.columns([300, 0.5, 0.5])  
 

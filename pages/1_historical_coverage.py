@@ -136,25 +136,29 @@ best_avg = avg_position.min()
 with col2:
     st.metric(label="Highest Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist additions')
 
-##########################################################
-top_artists_reach = df.groupby('Artist').agg({
+########################################################## 
+# TOP 5 HIGHEST REACH CHART
+########################################################## 
+
+# # Display the data for the most recent date
+top_artists_reach = df.groupby(['Artist', 'Title']).agg({
     'Followers': 'sum',
     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
 })
 
-# Sort DataFrame based on 'Followers' while maintaining the whole DataFrame
+# Sort the DataFrame based on 'Followers' while maintaining the whole DataFrame
 sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
 
 # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
 results_with_playlist = sorted_top_artists_reach.head(5).copy()
 
-# Calculate the 'Playlist_str' values 
+# Calculate the 'Playlist_str' values using an intermediate step
 playlist_str_series = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
 
 # Assign the calculated series to the DataFrame explicitly
 results_with_playlist['Playlist_str'] = playlist_str_series
 
-# Ensure 'Artist' is a column for Plotly
+# Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()
 
 # Create colour scale
