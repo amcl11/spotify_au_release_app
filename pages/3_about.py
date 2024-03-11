@@ -123,4 +123,4 @@ st.write("""
 Developer's source code here: 
     """)
 
-st.link_button(label='Github', url='github.com/amcl11')
+st.link_button(label='Github', url='https://github.com/amcl11/spotify_au_release_app')
