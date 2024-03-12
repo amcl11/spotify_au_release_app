@@ -48,7 +48,7 @@ def add_suffix_to_day(day):
 
 # Format the most recent Friday date
 day_with_suffix = add_suffix_to_day(most_recent_friday.day)
-most_recent_friday_str = most_recent_friday.strftime(f"New Music Friday: {day_with_suffix} %B, %Y")
+most_recent_friday_str = most_recent_friday.strftime(f"Release Date: {day_with_suffix} %B, %Y")
 
 # Display the most recent Friday 
 st.subheader(most_recent_friday_str)
