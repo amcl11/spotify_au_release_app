@@ -10,11 +10,7 @@ st.title('New Music Playlist Tracker (AU)')
 st.write("""
 This site aims to streamline Friday morning playlist checking for those interested in New Release coverage as well as historical coverage. 
     
-Not every new release is tracked... the list of new releases solely focuses on songs that were added to 
-    
-*New Music Friday AU & NZ*. 
-    
-It then uses this group of songs to check if they were also added to other key AU editorial playlists and also what positions they recieved.  
+The process involves retrieving all songs that have been added to New Music Friday AU & NZ. Then, these songs are reviewed to check whether they have also been added in key Australian editorial playlists. 
     
 *Note:* The historical coverage is a snapshot of Playlist adds between Friday (release) ==> Wednesday 9.00am AEST. 
     
@@ -109,7 +105,7 @@ if submit_button:
         # Save the extracted playlist ID
         save_user_input(playlist_id)
         
-        st.success("Submission recieved.")
+        st.success("Submission received.")
     else:
         st.error("Please submit a valid Spotify playlist link.")
 

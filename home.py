@@ -1,3 +1,4 @@
+# Dependencies 
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,132 +17,15 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 engine = create_engine(DATABASE_URL)
 
-# Load cover images and cover artist data from saved dictionaries as JSON
-with open('cover_art_data.json') as f:
-    data = json.load(f)
-
-cover_art_dict = data['filtered_cover_art_dict']
-cover_artist_dict = data['cover_artist_dict']
-
-def get_most_added_artist(engine):
-    query = """
-    SELECT "Artist", COUNT(*) AS count
-    FROM nmf_spotify_coverage
-    WHERE "Date" = (SELECT MAX("Date") FROM nmf_spotify_coverage)
-    GROUP BY "Artist", "Title"
-    ORDER BY count DESC
-    """
-    df = pd.read_sql(query, engine)
-    max_adds = df['count'].max()
-    most_added_artists = df[df['count'] == max_adds]['Artist'].tolist()
-    
-    if len(most_added_artists) > 1:
-        artist_names = " & ".join(most_added_artists[:-1]) + " and " + most_added_artists[-1]
-    else:
-        artist_names = most_added_artists[0]
-    
-    return artist_names, max_adds
-
-def get_highest_reach(engine):
-    query = """
-    WITH LatestDate AS (
-        SELECT MAX("Date") AS max_date FROM nmf_spotify_coverage
-    ), ArtistFollowers AS (
-        SELECT "Artist", SUM("Followers") AS total_followers
-        FROM nmf_spotify_coverage, LatestDate
-        WHERE "Date" = LatestDate.max_date
-        GROUP BY "Artist", "Title"
-    ), MaxFollowers AS (
-        SELECT MAX(total_followers) AS max_followers
-        FROM ArtistFollowers
-    )
-    SELECT af."Artist", af.total_followers
-    FROM ArtistFollowers af
-    JOIN MaxFollowers mf ON af.total_followers = mf.max_followers;
-    """
-    
-    # Execute the query and fetch the data into a DataFrame
-    df = pd.read_sql_query(query, engine)
-    
-    # Extract artist names and followers count
-    most_reach_artists = df['Artist'].tolist()
-    max_followers = df['total_followers'].iloc[0] if not df.empty else 0
-    
-    # Format the artist names for display
-    if len(most_reach_artists) > 1:
-        artist_names_reach = ", ".join(most_reach_artists[:-1]) + " and " + most_reach_artists[-1]
-    else:
-        artist_names_reach = most_reach_artists[0] if most_reach_artists else "No artists"
-    
-    return artist_names_reach, max_followers
-
-def highest_average_position(engine):
-    query = """
-    WITH LatestDate AS (
-        SELECT MAX("Date") AS max_date FROM nmf_spotify_coverage
-    ), AvgPosition AS (
-        SELECT "Artist", AVG("Position") AS average_position
-        FROM nmf_spotify_coverage
-        WHERE "Date" = (SELECT max_date FROM LatestDate)
-        GROUP BY "Artist"
-    ), BestAvgPosition AS (
-        SELECT "Artist", average_position
-        FROM AvgPosition
-        ORDER BY average_position ASC
-        LIMIT 1
-    )
-    SELECT * FROM BestAvgPosition;
-    """
-    
-    # Execute the query
-    df = pd.read_sql_query(query, engine)
-    
-    # Assuming df will have exactly one row as per the query's LIMIT 1
-    if not df.empty:
-        best_avg_playlist_position_by_artist = df.iloc[0]['Artist']
-        best_avg = df.iloc[0]['average_position']
-    else:
-        best_avg_playlist_position_by_artist = "N/A"
-        best_avg = None
-
-    return best_avg_playlist_position_by_artist, best_avg
-
-# Function to fetch unique dates from the database
-@st.cache_data
-def fetch_unique_dates():
-    query = "SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC"
-    unique_dates_df = pd.read_sql_query(query, engine)
-
-    # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
-    # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
-    unique_dates_df['Date'] = pd.to_datetime(unique_dates_df['Date'], format='%Y-%m-%d', errors='coerce')
-    
-    # Filter out any rows where the date could not be parsed
-    unique_dates_df = unique_dates_df.dropna(subset=['Date'])
-
-    # Convert dates to a more readable string format for display
-    return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
-
-# Function to load database data based on most recent 'Date'
-# @st.cache_data # Removed caching - Was effecting db update post triple j adds
-def load_db_for_most_recent_date():
-    query = """
-    SELECT * FROM nmf_spotify_coverage
-    WHERE "Date" = (SELECT MAX("Date") FROM nmf_spotify_coverage)
-    """
-    database_df = pd.read_sql_query(query, engine)
-    return database_df
-
+##################################
+# TITLE INFO
+##################################
+st.title('New Release Playlist Adds:')
 left_column, middle_column, right_column = st.columns(3)
 left_column.image('images/nmf_logo_transparent_background.png')
 
-# Don't really need today's date 
-# todays_date = datetime.now().strftime("%A, %d %B, %Y")  # Format the date as Weekday, Day, Month, Year
-# right_column.write(todays_date)
-
-st.title('New Release Playlist Adds:')
-st.write('---')  # Add a visual separator
-st.write('This site pulls all songs added to *New Music Friday AU & NZ*, and then checks to see if these songs have also been added to any key Australian editorial playlists.')  
+st.write('This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.')
+st.write('All songs added to *New Music Friday AU & NZ* are fetched, and then these songs are checked against key Australian editorial playlists.')  
 st.write('For more info and the list of playlists that are tracked, check the About page.')  
 st.write('---')  # Add a visual separator
 
@@ -164,59 +48,108 @@ def add_suffix_to_day(day):
 
 # Format the most recent Friday date
 day_with_suffix = add_suffix_to_day(most_recent_friday.day)
-most_recent_friday_str = most_recent_friday.strftime(f"Friday {day_with_suffix} %B, %Y")
+most_recent_friday_str = most_recent_friday.strftime(f"New Music Friday: {day_with_suffix} %B, %Y")
 
 # Display the most recent Friday 
 st.subheader(most_recent_friday_str)
 
+############################################################################################
+# MAIN FUNCTION TO LOAD LATEST FRIDAY DATA FOR HOME.PY - Cached for 58.33 mins (ttl=3500) 
+############################################################################################
+
+@st.cache_data(ttl=3500, show_spinner='Fetching New Releases...')
+def load_db_for_most_recent_date():
+    query = """
+    SELECT * FROM nmf_spotify_coverage
+    WHERE "Date" = (SELECT MAX("Date") FROM nmf_spotify_coverage)
+    """
+    latest_friday_df = pd.read_sql_query(query, engine)
+    return latest_friday_df
+
+# Main dataframe to use for home.py 
+latest_friday_df = load_db_for_most_recent_date()
+
+# Set columns for metrics 
 col1, col2, col3 = st.columns([300, 0.5, 0.5])  
 
+# Set metric text size
 st.markdown(
     """
 <style>
 [data-testid="stMetricValue"] {
-    font-size: 20px;
+    font-size: 18px;
 }
 </style>
 """,
     unsafe_allow_html=True,
 )
-##########################################################
-# Retrieve Most Added
-artist_names, max_adds = get_most_added_artist(engine)
 
-# Set Most Added metric
-with col1:
-    st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
-    st.write("")
-    
-# Retrieve Highest Reach
-artist_names_reach, max_followers = get_highest_reach(engine)
+#######################
+# HIGHEST REACH METRIC 
+#######################
 
-# Set Highest Reach metric
-with col1:
-    st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across playlist adds. Only based on the tracked playlists.', delta_color='normal')
-    
-# Retrieve Best Average By Artist
-best_avg_playlist_position_by_artist, best_avg = highest_average_position(engine)
+# Group by 'Title' and 'Artist', then sum the 'Followers' column
+highest_reach = latest_friday_df.groupby(['Title', 'Artist'])['Followers'].sum().reset_index(name='Reach')
 
+# Find the maximum reach
+max_reach = highest_reach['Reach'].max()
 
-# Set Best Average Playlist Position
-with col1:
-    st.metric(label="Highest Average Playlist Position", 
-              value=f"{best_avg_playlist_position_by_artist}", 
-              delta=f"{best_avg:.0f}" if best_avg is not None else "N/A", 
-              delta_color='normal', 
-              help='Averages all positions across any new playlist additions')
+# Filter to get the titles with the maximum reach
+highest_reach_max = highest_reach[highest_reach['Reach'] == max_reach].reset_index(drop=True)
+
+# Display the 'Highest Reach' title(s) and artist(s) as metrics in col1
+for i in range(len(highest_reach_max)):
+    title, artist, reach = highest_reach_max.iloc[i]['Title'], highest_reach_max.iloc[i]['Artist'], highest_reach_max.iloc[i]['Reach']
+    with col1:
+        st.metric(label="Highest Reach", value=f"{artist} - '{title}'", delta=f"{reach:0,}")
+        st.write("")  # Adds space between metrics if there are multiple
+
+#######################
+# MOST ADDED METRIC
+#######################
+
+# Use latest_friday_df from earlier in the code
+# Find the titles with the most entries
+most_added = latest_friday_df.groupby(['Title', 'Artist']).size().reset_index(name='Count')
+
+max_count = most_added['Count'].max()
+most_added_max = most_added[most_added['Count'] == max_count].reset_index(drop=True)
+
+# Display the most added title(s) and artist(s) as metrics in col1
+for i in range(len(most_added_max)):
+    title, artist = most_added_max.iloc[i]['Title'], most_added_max.iloc[i]['Artist']
+    with col1:
+        st.metric(label=f"Most Added", value=f"{artist} - '{title}'", delta=f"Added to {max_count} playlists")
+        st.write("")  # Adds some space between metrics if there are multiple
+
+#################################
+# BEST AVERAGE PLAYLIST POSITION 
+#################################
+
+# Use latest_friday_df from earlier in the code
+# Group by 'Title' and 'Artist', then find the average 'Position'
+avg_position = latest_friday_df.groupby(['Title', 'Artist'])['Position'].mean().reset_index(name='AvgPosition')
+
+# Find the minimum average position
+min_avg_position = avg_position['AvgPosition'].min()
+
+# Filter to get the titles and artists with the minimum average position
+lowest_avg_position = avg_position[avg_position['AvgPosition'] == min_avg_position].reset_index(drop=True)
+
+# Display the title(s) and artist(s) with the lowest average position as metrics in col1
+for i in range(len(lowest_avg_position)):
+    title, artist = lowest_avg_position.iloc[i]['Title'], lowest_avg_position.iloc[i]['Artist']
+    with col1:
+        # Using the title "Top Ranking" or similar since we're showing the lowest avg. position (which is best)
+        st.metric(label="Best Average Playlist Position", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}")
+        st.write("")  # Adds some space between metrics if there are multiple
 
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
 
-# # Display the data for the most recent date
-df = load_db_for_most_recent_date()
-
-top_artists_reach = df.groupby(['Artist', 'Title']).agg({
+# Use latest_friday_df from earlier in the code
+top_artists_reach = latest_friday_df.groupby(['Artist', 'Title']).agg({
     'Followers': 'sum',
     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
 })
@@ -242,13 +175,14 @@ color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
 # Create a bar chart using Plotly Express
 fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              text='Followers',
-             hover_data=['Playlist_str'],  # Add 'Playlist_str' to hover data
+             hover_data=['Title', 'Playlist_str'],  # Add 'Playlist_str' to hover data
              color='Followers',  # Assign color based on 'Followers' values
              color_continuous_scale=color_scale  # Use custom color scale
              )
 
 # Custom hover template to include Playlist information
-fig.update_traces(hovertemplate='<b>%{x}</b><br>Reach: %{y:,}<br>Playlists: %{customdata[0]}')
+# Update hovertemplate to include 'Title'
+fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}<br>Playlists: %{customdata[1]}')
 
 # Display the exact number of followers on top of each bar and adjust other aesthetics
 fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
@@ -273,15 +207,16 @@ fig.update_layout(
 # Display the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True)
 
-##########################################################
+########################
 # SEARCH ADDS BY SONG
-##########################################################
-
+########################
 st.subheader('Search Adds By Song:')
 
 # Combine Artist & Title for the first dropdown box: 
-df['Artist_Title'] = df['Artist'] + " - " + df['Title']
-choices = df['Artist_Title'].unique()
+# Use latest_friday_df from earlier in the code
+
+latest_friday_df['Artist_Title'] = latest_friday_df['Artist'] + " - " + latest_friday_df['Title']
+choices = latest_friday_df['Artist_Title'].unique()
 
 # Sort the choices in alphabetical order before displaying in the dropdown
 sorted_choices = sorted(choices, key=lambda x: x.lower())
@@ -290,7 +225,7 @@ sorted_choices = sorted(choices, key=lambda x: x.lower())
 selected_artist_title = st.selectbox('Select New Release:', sorted_choices)
 
 # Filter DataFrame based on selection, then drop unnecessary columns for display
-filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
+filtered_df = latest_friday_df[latest_friday_df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
 
 # Order the filtered_df by 'Followers' in descending order
 ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
@@ -301,18 +236,20 @@ ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
 
-##########################################################
+
+###########################
 # SEARCH ADDS BY PLAYLIST
-##########################################################
+###########################
 st.write("")
 st.subheader('Search Adds By Playlist:')
 
-playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
+# Use latest_friday_df from earlier in the code
+playlist_choices = sorted(latest_friday_df['Playlist'].unique(), key=lambda x: x.lower())
 
 selected_playlist = st.selectbox('Select Playlist:', playlist_choices, key='playlist_select')
 
 # Filter DataFrame based on the selected playlist
-filtered_playlist_df = df[df['Playlist'] == selected_playlist]
+filtered_playlist_df = latest_friday_df[latest_friday_df['Playlist'] == selected_playlist]
 
 # Display all songs in the selected playlist
 st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
@@ -322,7 +259,8 @@ st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(b
 #################################################
 
 # Filter out rows where either 'Cover_Artist' or 'Image_URL' is None before grouping
-filtered_df = df.dropna(subset=['Cover_Artist', 'Image_URL'])
+# Use latest_friday_df from earlier in the code
+filtered_df = latest_friday_df.dropna(subset=['Cover_Artist', 'Image_URL'])
 
 new_cover_artist_df = filtered_df.groupby('Playlist').agg({
     'Image_URL': 'first',
@@ -367,18 +305,17 @@ st.write('- - - - - -')
 ##########################################################
 
 # Calculate the number of adds per playlist and sort for plotting
-adds_per_playlist = df['Playlist'].value_counts().sort_values(ascending=True)
+# Use latest_friday_df from earlier in the code
+adds_per_playlist = latest_friday_df['Playlist'].value_counts().sort_values(ascending=True)
 
 # Setting the style for the plot
-
-# Plotting
 fig, ax = plt.subplots(figsize=(6, 8), facecolor= '#0E1117')  # Adjust figure size for readability
 adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
 
 ax.set_facecolor('#0E1117')
 fig.patch.set_facecolor('#0E1117')
 
-# Customize tick parameters for better legibility
+# Customise tick parameters for better legibility
 ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
 ax.tick_params(axis='y', colors='white', labelsize=12)  # Adjust y-axis ticks
 ax.set_title('Adds By Playlist', pad=70, weight='bold', color='white', fontsize=20, loc='left')
@@ -403,47 +340,4 @@ for location in ['left', 'right', 'top', 'bottom']:
     ax.spines[location].set_visible(False)
 
 st.pyplot(fig)
-
-# # Plotly version 
-# fig = px.bar(adds_per_playlist, orientation='h', 
-#              color=adds_per_playlist.values, color_continuous_scale=['#ab47bc', '#ab47bc'],
-#              text=adds_per_playlist.values)
-
-# # Customize layout
-# fig.update_layout(
-#     plot_bgcolor='#0E1117',  # Set the background color of the plot
-#     paper_bgcolor='#0E1117', # Set the background color surrounding the plot
-#     font_color="white",      # Set the color of all text in the plot
-#     title={
-#         'text': "Adds By Playlist",
-#         'y':0.9,
-#         'x':0.05,
-#         'xanchor': 'left',
-#         'yanchor': 'top'
-#     },
-#     xaxis_title="",
-#     xaxis=dict(
-#         showgrid=False,  # Hide the grid
-#         tickmode = 'array',
-#         tickvals = [10, 20, 30, 40, 50, 60, 70, 80],
-#         ticktext = [10, 20, 30, 40, 50, 60, 70, 80]
-#     ),
-#     yaxis=dict(
-#         showgrid=False,  # Hide the grid
-#         tickmode = 'array',
-#         tickvals = adds_per_playlist.index,
-#         ticktext = adds_per_playlist.index
-#     ),
-#     coloraxis_showscale=False,  # Hide color scale
-# )
-
-# fig.update_traces(textangle= 45)  # Rotate bar text labels 
-
-# # Remove axis lines
-# fig.update_xaxes(showline=False, linewidth=0)
-# fig.update_yaxes(showline=False, linewidth=0)
-
-# # Display the figure
-# fig.show()
-# st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 

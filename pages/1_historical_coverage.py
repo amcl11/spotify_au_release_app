@@ -6,15 +6,14 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px
 
-# Set db connection
-DATABASE_URL = os.environ['DATABASE_URL']
-if DATABASE_URL.startswith("postgres://"):
+# Setup DATABASE_URL and engine
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
 engine = create_engine(DATABASE_URL)
 
 # Function to fetch unique dates from the database
-# @st.cache_data
+@st.cache_data(ttl=3500, show_spinner='Fetching available dates...')
 def fetch_unique_dates():
     query = "SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC"
     unique_dates_df = pd.read_sql_query(query, engine)
@@ -32,17 +31,18 @@ def fetch_unique_dates():
 
 # Function to load database data based on selected date
 # @st.cache_data - this was hingering updated triple j adds on Monday 
+@st.cache_data(ttl=3500, show_spinner='Loading data...')
 def load_db(selected_date_for_sql):
     query = "SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = %s"
     database_df = pd.read_sql_query(query, engine, params=(selected_date_for_sql,))
     return database_df
 
-st.subheader('Select a previous Friday to explore past coverage...')
+st.subheader('Explore past release coverage:')
 
 # Fetch unique dates and prepare them for the selectbox
 unique_dates = fetch_unique_dates()
 
-st.write('- - - - - -')
+
 
 # User selects a date
 selected_date_format = st.selectbox("Select a Friday", options=unique_dates)
@@ -101,10 +101,7 @@ with col2:
     st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
 
 
-#########################################
-# TOP 5 HIGHEST REACH GRAPH
-#########################################
-
+# Highest Reach 
 # Group by 'Title' and sum the 'Followers' for each title
 title_followers = df.groupby('Title')['Followers'].sum()
 
@@ -129,13 +126,21 @@ with col2:
 
 
 # Highest Average Playlist Position 
-avg_position = df.groupby('Artist')['Position'].mean()
+# Calculate the average position by grouping by 'Title' and 'Artist'
+avg_position = df.groupby(['Title', 'Artist'])['Position'].mean()
+
+# Find the index (Title, Artist) of the minimum average position
 best_avg_playlist_position_by_artist = avg_position.idxmin()
+
+# Extract just the 'Artist' from the index
+best_artist = best_avg_playlist_position_by_artist[1]  # Access the second element for 'Artist'
+
+# Find the minimum average position
 best_avg = avg_position.min()
 
 with col2:
-    st.metric(label="Highest Average Playlist Position", value=f"{best_avg_playlist_position_by_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist additions')
-
+    st.metric(label="Best Average Playlist Position", value=f"{best_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist additions')
+    
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
@@ -197,8 +202,9 @@ fig.update_layout(
 # Display the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True)
 
-##########################################################
-
+########################
+# SEARCH ADDS BY SONG
+########################
 st.subheader('Search Adds By Song:')
 
 # Combine Artist & Title for the first dropdown box: 
@@ -225,6 +231,9 @@ st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_con
 
 st.write('- - - - - -') 
 
+###########################
+# SEARCH ADDS BY PLAYLIST
+###########################
 st.subheader('Search Adds By Playlist:')
 
 playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
