@@ -172,13 +172,14 @@ color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
 # Create bar chart with Plotly Express
 fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              text='Followers',
-             hover_data=['Playlist_str'],  # Add 'Playlist_str' to hover data
+             hover_data=['Title', 'Playlist_str'],  # Add 'Playlist_str' to hover data
              color='Followers',  # Assign color based on 'Followers' values
              color_continuous_scale=color_scale  # Use the custom color scale
              )
 
 # Custom hover template to include Playlist information
-fig.update_traces(hovertemplate='<b>%{x}</b><br>Reach: %{y:,}<br>Playlists: %{customdata[0]}')
+# Update hovertemplate to include 'Title'
+fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}<br>Playlists: %{customdata[1]}')
 
 # Display the exact number of followers on top of each bar and adjust other aesthetics
 fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
