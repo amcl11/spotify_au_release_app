@@ -10,13 +10,12 @@ from datetime import datetime
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 import psycopg2
-
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import pytz
 
 def schedule():
-    print(f"Automated Data Pull executed at {datetime.datetime.now(pytz.timezone('Australia/Sydney'))}")
+    print(f"Automated Data Pull executed at {datetime.now(pytz.timezone('Australia/Sydney'))}")
     scheduler = BackgroundScheduler(timezone="Australia/Sydney")
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=1))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=15))
