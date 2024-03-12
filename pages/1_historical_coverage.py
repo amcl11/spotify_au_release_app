@@ -42,8 +42,6 @@ st.subheader('Explore past release coverage:')
 # Fetch unique dates and prepare them for the selectbox
 unique_dates = fetch_unique_dates()
 
-
-
 # User selects a date
 selected_date_format = st.selectbox("Select a Friday", options=unique_dates)
 
@@ -74,34 +72,11 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-#########################################
-# MOST ADDED ARTISTS
-#########################################
 
-# Group by 'Title' and count the occurrences
-title_counts = df.groupby('Title').size()
+#######################
+# HIGHEST REACH METRIC 
+#######################
 
-# Find the max number of adds
-max_adds = title_counts.max()
-
-# Find the title(s) with the max number of adds
-most_added_titles = title_counts[title_counts == max_adds].index.tolist()
-
-# Filter the original DataFrame to get the artist(s) for the most added title(s)
-most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(subset=['Title', 'Artist'])
-
-# Format the artist names
-if len(most_added_artists_df) > 1:
-    artist_names = " & ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " and " + most_added_artists_df['Artist'].tolist()[-1]
-else:
-    artist_names = most_added_artists_df['Artist'].iloc[0]
-
-# Display the result
-with col2:
-    st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
-
-
-# Highest Reach 
 # Group by 'Title' and sum the 'Followers' for each title
 title_followers = df.groupby('Title')['Followers'].sum()
 
@@ -125,7 +100,36 @@ with col2:
     st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across playlist adds. Only based on the tracked playlists.', delta_color='normal')
 
 
-# Highest Average Playlist Position 
+#######################
+# MOST ADDED METRIC
+#######################
+
+# Group by 'Title' and count the occurrences
+title_counts = df.groupby('Title').size()
+
+# Find the max number of adds
+max_adds = title_counts.max()
+
+# Find the title(s) with the max number of adds
+most_added_titles = title_counts[title_counts == max_adds].index.tolist()
+
+# Filter the original DataFrame to get the artist(s) for the most added title(s)
+most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(subset=['Title', 'Artist'])
+
+# Format the artist names
+if len(most_added_artists_df) > 1:
+    artist_names = " & ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " and " + most_added_artists_df['Artist'].tolist()[-1]
+else:
+    artist_names = most_added_artists_df['Artist'].iloc[0]
+
+# Display the result
+with col2:
+    st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
+
+####################################
+# HIGHEST AVERAGE PLAYLIST POSITION 
+####################################
+
 # Calculate the average position by grouping by 'Title' and 'Artist'
 avg_position = df.groupby(['Title', 'Artist'])['Position'].mean()
 
@@ -139,7 +143,7 @@ best_artist = best_avg_playlist_position_by_artist[1]  # Access the second eleme
 best_avg = avg_position.min()
 
 with col2:
-    st.metric(label="Best Average Playlist Position", value=f"{best_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist additions')
+    st.metric(label="Highest Average Playlist Position", value=f"{best_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist additions')
     
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
@@ -185,19 +189,26 @@ fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}
 fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
 fig.update_layout(
     xaxis_title="",
-    yaxis_title="Total Reach",
+    yaxis_title="Total  Reach",
     yaxis=dict(type='linear'),
     xaxis_tickangle=-30,
-    plot_bgcolor='rgba(0,0,0,0)',
+    # plot_bgcolor='rgba(0,0,0)',
+    # paper_bgcolor='rgb(0,0,0)',  # black paper background for the entire figure
     margin=dict(t=100),
     title=dict(
         text='Top 5 Highest Reach',
-        y=0.9,  # Adjust the title's position on the y-axis
+        font=dict(
+            family="Aria, sans-serif",
+            size=16,
+            color="#FAFAFA"
+        ),
+        y=0.8,  # Adjust the title's position on the y-axis
         x=0.5,  # Center the title on the x-axis
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
+        
 ),
-    coloraxis_showscale=False  # Hide the color scale legend
+    coloraxis_showscale=False  # Optionally hide color scale legend
     
     )
 # Display the figure in Streamlit

@@ -13,7 +13,7 @@ if DATABASE_URL.startswith("postgres://"):
 engine = create_engine(DATABASE_URL)
 
 # Function to fetch all data for artists with more than one unique title
-@st.cache_data
+@st.cache_data(show_spinner="Fetching artists...")
 def fetch_artists_for_selectbox():
     query = """
     SELECT "Artist"
@@ -25,7 +25,7 @@ def fetch_artists_for_selectbox():
     return artists_df['Artist'].tolist()
 
 # Function to fetch all available data for a selected artist
-@st.cache_data
+@st.cache_data(show_spinner="Loading data...")
 def fetch_data_for_selected_artist(artist_name):
     query = 'SELECT * FROM nmf_spotify_coverage WHERE "Artist" = %s'
     artist_data_df = pd.read_sql_query(query, engine, params=(artist_name,))
@@ -34,7 +34,7 @@ def fetch_data_for_selected_artist(artist_name):
 st.subheader('Compare releases by artist:')
 st.write('*Data available from 23rd Feb 2024 onwards*')
 st.markdown(
-    '<p style="font-size: 12px;">*This site only tracks releases that were added to NMF AU & NZ</p>', 
+    '<p style="font-size: 14px;">*This site only tracks releases that were added to NMF AU & NZ</p>', 
     unsafe_allow_html=True
 )
 st.write('--------------')

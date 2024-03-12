@@ -101,8 +101,8 @@ highest_reach_max = highest_reach[highest_reach['Reach'] == max_reach].reset_ind
 for i in range(len(highest_reach_max)):
     title, artist, reach = highest_reach_max.iloc[i]['Title'], highest_reach_max.iloc[i]['Artist'], highest_reach_max.iloc[i]['Reach']
     with col1:
-        st.metric(label="Highest Reach", value=f"{artist} - '{title}'", delta=f"{reach:0,}")
-        st.write("")  # Adds space between metrics if there are multiple
+        st.metric(label=":gray[Highest Reach]", value=f"{artist} - '{title}'", delta=f"{reach:0,}")
+        # st.write("")  # Adds space between metrics if there are multiple
 
 #######################
 # MOST ADDED METRIC
@@ -111,20 +111,29 @@ for i in range(len(highest_reach_max)):
 # Use latest_friday_df from earlier in the code
 # Find the titles with the most entries
 most_added = latest_friday_df.groupby(['Title', 'Artist']).size().reset_index(name='Count')
-
 max_count = most_added['Count'].max()
 most_added_max = most_added[most_added['Count'] == max_count].reset_index(drop=True)
 
-# Display the most added title(s) and artist(s) as metrics in col1
-for i in range(len(most_added_max)):
-    title, artist = most_added_max.iloc[i]['Title'], most_added_max.iloc[i]['Artist']
-    with col1:
-        st.metric(label=f"Most Added", value=f"{artist} - '{title}'", delta=f"Added to {max_count} playlists")
-        st.write("")  # Adds some space between metrics if there are multiple
+# Use a variable to track if the label has been displayed
+label_displayed = False
 
-#################################
-# BEST AVERAGE PLAYLIST POSITION 
-#################################
+for i, (index, row) in enumerate(most_added_max.iterrows()):
+    title, artist = row['Title'], row['Artist']
+    # For the first item, display the label
+    if i == 0:
+        label = ":grey[Most Added]"
+    else:
+        # For subsequent items, check if the title is different.
+        # If it is, update the label to be displayed; if not, keep the label empty
+        label = "" if title == most_added_max.iloc[i-1]['Title'] else":grey[Most Added]"
+
+    with col1:
+        st.metric(label=label, value=f"{artist} - '{title}'", delta=f"Added to {max_count} playlists")
+        
+
+####################################
+# HIGHEST AVERAGE PLAYLIST POSITION 
+####################################
 
 # Use latest_friday_df from earlier in the code
 # Group by 'Title' and 'Artist', then find the average 'Position'
@@ -140,9 +149,7 @@ lowest_avg_position = avg_position[avg_position['AvgPosition'] == min_avg_positi
 for i in range(len(lowest_avg_position)):
     title, artist = lowest_avg_position.iloc[i]['Title'], lowest_avg_position.iloc[i]['Artist']
     with col1:
-        # Using the title "Top Ranking" or similar since we're showing the lowest avg. position (which is best)
-        st.metric(label="Best Average Playlist Position", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}")
-        st.write("")  # Adds some space between metrics if there are multiple
+        st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}")
 
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
@@ -188,7 +195,7 @@ fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}
 fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
 fig.update_layout(
     xaxis_title="",
-    yaxis_title="Total Reach",
+    yaxis_title="Total  Reach",
     yaxis=dict(type='linear'),
     xaxis_tickangle=-30,
     # plot_bgcolor='rgba(0,0,0)',
@@ -196,10 +203,16 @@ fig.update_layout(
     margin=dict(t=100),
     title=dict(
         text='Top 5 Highest Reach',
-        y=0.9,  # Adjust the title's position on the y-axis
+        font=dict(
+            family="Aria, sans-serif",
+            size=16,
+            color="#FAFAFA"
+        ),
+        y=0.8,  # Adjust the title's position on the y-axis
         x=0.5,  # Center the title on the x-axis
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
+        
 ),
     coloraxis_showscale=False  # Optionally hide color scale legend
     
@@ -235,7 +248,6 @@ ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
-
 
 ###########################
 # SEARCH ADDS BY PLAYLIST

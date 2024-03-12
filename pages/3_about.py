@@ -8,9 +8,9 @@ col1, col2, col3 = st.columns(3)
 # App Title
 st.title('New Music Playlist Tracker (AU)')
 st.write("""
-This site aims to streamline Friday morning playlist checking for those interested in New Release coverage as well as historical coverage. 
+This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.
     
-The process involves retrieving all songs that have been added to New Music Friday AU & NZ. Then, these songs are reviewed to check whether they have also been added in key Australian editorial playlists. 
+The process involves retrieving all songs that have been added to New Music Friday AU & NZ. Then, these songs are reviewed to check whether they have also been added to key Australian editorial playlists. 
     
 *Note:* The historical coverage is a snapshot of Playlist adds between Friday (release) ==> Wednesday 9.00am AEST. 
     
