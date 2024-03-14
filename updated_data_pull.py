@@ -10,13 +10,13 @@ from datetime import datetime
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 import psycopg2
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler``
 from apscheduler.triggers.cron import CronTrigger
 import pytz
 
 def schedule():
     print(f"Automated Data Pull executed at {datetime.now(pytz.timezone('Australia/Sydney'))}")
-    scheduler = BackgroundScheduler(timezone="Australia/Sydney")
+    scheduler = BlockingScheduler(timezone="Australia/Sydney")
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=1))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=15))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=1, minute=0))
@@ -50,7 +50,11 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='tue', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='wed', hour=9, minute=0))
-    scheduler.start()
+
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
 
 def data_pull():
     # data pull logic and database upload below
@@ -272,6 +276,8 @@ def data_pull():
     logging.info("Database upload completed.")
     
     pass
+
+
 
 if __name__ == "__main__":
     schedule()
