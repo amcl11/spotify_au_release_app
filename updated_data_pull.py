@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 import psycopg2
-from apscheduler.schedulers.blocking import BlockingScheduler``
+from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 import pytz
 
