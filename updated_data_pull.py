@@ -17,8 +17,10 @@ import pytz
 def schedule():
     print(f"Automated Data Pull executed at {datetime.now(pytz.timezone('Australia/Sydney'))}")
     scheduler = BackgroundScheduler(timezone="Australia/Sydney")
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=1))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=15))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=1))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=15))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=1, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=1, minute=10))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=5, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=7, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=8, minute=0))
