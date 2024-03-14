@@ -11,6 +11,22 @@ import os
 
 # set_theme() # Backup option if config theme setting don't work
 
+col1, col2, col3 = st.columns([6, 6, 6])
+
+with col3:
+    st.write(
+        """
+        <style>
+            .my-text {
+                font-size: 10px;
+                font-family: monospace;
+            }
+        </style>
+        <p class="my-text">[Best viewed on Desktop]</p>
+        """,
+        unsafe_allow_html=True,
+    )
+    
 # Setup DATABASE_URL and engine
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
@@ -84,6 +100,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Remove download and other buttons from all Dataframes
+st.markdown(
+                """
+                <style>
+                [data-testid="stElementToolbar"] {
+                    display: none;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+
 #######################
 # HIGHEST REACH METRIC 
 #######################
@@ -101,7 +129,7 @@ highest_reach_max = highest_reach[highest_reach['Reach'] == max_reach].reset_ind
 for i in range(len(highest_reach_max)):
     title, artist, reach = highest_reach_max.iloc[i]['Title'], highest_reach_max.iloc[i]['Artist'], highest_reach_max.iloc[i]['Reach']
     with col1:
-        st.metric(label=":gray[Highest Reach]", value=f"{artist} - '{title}'", delta=f"{reach:0,}")
+        st.metric(label=":gray[Highest Reach]", value=f"{artist} - '{title}'", delta=f"{reach:0,}", help='Total reach across AU playlist adds. Only based on the tracked playlists.')
         # st.write("")  # Adds space between metrics if there are multiple
 
 #######################
@@ -149,7 +177,7 @@ lowest_avg_position = avg_position[avg_position['AvgPosition'] == min_avg_positi
 for i in range(len(lowest_avg_position)):
     title, artist = lowest_avg_position.iloc[i]['Title'], lowest_avg_position.iloc[i]['Artist']
     with col1:
-        st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}")
+        st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}", help='Averages all positions across any new AU playlist additions')
 
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
@@ -218,7 +246,7 @@ fig.update_layout(
     
     )
 # Display the figure in Streamlit
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False} )
 
 ########################
 # SEARCH ADDS BY SONG
@@ -247,7 +275,7 @@ ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}")
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
-st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
+st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
 
 ###########################
 # SEARCH ADDS BY PLAYLIST
@@ -263,8 +291,21 @@ selected_playlist = st.selectbox('Select Playlist:', playlist_choices, key='play
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = latest_friday_df[latest_friday_df['Playlist'] == selected_playlist]
 
-# Display all songs in the selected playlist
-st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
+#testing this for mobile no horizontal scroll
+st.data_editor(
+    data=filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True),
+    disabled=True,  # Ensures data cannot be edited
+    use_container_width=False,  # Adjust based on your layout needs
+    column_config={
+        "Artist": {"width": 150},  # Set tighter width
+        "Title": {"width": 120},   # Set width 
+        "Position": {"width": 58}
+    },
+    hide_index=True
+)
+
+# # Display all songs in the selected playlist
+# st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=False)
 
 #################################################
 # Cover Artists DataFrame 
@@ -282,74 +323,71 @@ new_cover_artist_df = filtered_df.groupby('Playlist').agg({
 final_cover_artist_df = new_cover_artist_df[['Playlist', 'Cover_Artist']]
 
 st.subheader('Cover Artists:')
-st.dataframe(final_cover_artist_df, use_container_width=True, hide_index=True)
+st.dataframe(final_cover_artist_df, use_container_width=False, hide_index=True)
 
 st.write("") # padding 
 st.write("*Note: Cover artist may update before cover images*")
 
+#############################
 # Playlist packshots
-col1, col2, col3 = st.columns(3)
+#############################
 
-# Create a list of columns for easier access
-cols = [col1, col2, col3]
+col1, col2 = st.columns(2)  # Use two columns instead of three
 
-# Total number of playlists
+# Update the list of columns for easier access
+cols = [col1, col2]
+
+# Total number of playlists remains the same
 total_playlists = len(new_cover_artist_df)
 
-# Iterate over DataFrame rows
+# Iterate over DataFrame rows as before
 for index, row in new_cover_artist_df.iterrows():
     playlist_name = row['Playlist']
     artist_name = row['Cover_Artist']
     image_url = row['Image_URL']
     
-    # Check if this is the last image and if the total number is not divisible by 3, put it in col2
-    if index == total_playlists - 1 and total_playlists % 3 != 0:
-        col_index = 1  # Explicitly set to use col2
+    # For two columns, adjust the logic accordingly
+    if index == total_playlists - 1 and total_playlists % 2 != 0:
+        col_index = 1  # Use col2 for the last image if odd number of playlists
     else:
-        # Calculate the column index in a round-robin fashion for all other cases
-        col_index = index % 3
+        col_index = index % 2  # Use modulo 2 for two columns
     
-    # Display the image in the appropriate column with the artist name as the caption
-    cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=200)
+    # Display the image in the selected column with the artist name as the caption
+    cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=300)
 
 st.write('- - - - - -') 
-
 ##########################################################
 
-# Calculate the number of adds per playlist and sort for plotting
-# Use latest_friday_df from earlier in the code
+# # Calculate the number of adds per playlist and sort for plotting
+# # Use latest_friday_df from earlier in the code
 adds_per_playlist = latest_friday_df['Playlist'].value_counts().sort_values(ascending=True)
 
-# Setting the style for the plot
-fig, ax = plt.subplots(figsize=(6, 8), facecolor= '#0E1117')  # Adjust figure size for readability
-adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')  # Adjusted to a lighter purple
+fig, ax = plt.subplots(figsize=(6, 8), facecolor= '#0E1117')
+adds_per_playlist.plot(kind='barh', ax=ax, color='#ab47bc')
 
 ax.set_facecolor('#0E1117')
 fig.patch.set_facecolor('#0E1117')
 
-# Customise tick parameters for better legibility
-ax.tick_params(axis='x', colors='white', labelsize=12)  # Adjust x-axis ticks
-ax.tick_params(axis='y', colors='white', labelsize=12)  # Adjust y-axis ticks
-ax.set_title('Adds By Playlist', pad=70, weight='bold', color='white', fontsize=20, loc='left')
+# Customise tick parameters 
+ax.tick_params(axis='x', colors='white', labelsize=12, bottom=False, labelbottom=False)  # Hide x ticks
+ax.tick_params(axis='y', colors='white', labelsize=12)
+ax.tick_params(axis='y', which='both', left=False, labelleft=True)  # Remove Y-axis ticks but keep labels
 
-# Explicitly remove the grid
+# Reduced padding between title and x-axis label
+ax.set_title('Adds By Playlist', pad=15, weight='bold', color='white', fontsize=20, loc='left')
+
 ax.grid(False)
-
-# Move the x-axis label to the top
 ax.xaxis.set_label_position('top')
 
-ax.xaxis.tick_top()
+# Custom formatting for x-axis label with reduced label padding
+ax.set_xlabel('No. of New Releases Added', labelpad=10, weight='light', color='white', fontsize=10, loc='left')
 
-# Set the x-axis label with custom formatting
-ax.set_xlabel('No. of New Releases Added', labelpad=20, weight='light', color='white', fontsize=10, loc='left')
-ax.set_xticks([10, 20, 30, 40, 50, 60, 70, 80])
-ax.tick_params(top=False, left=False, right=False)
-# Assume the rest of the code is written
-ax.axvline(x=10, ymin=0.01, c='grey', alpha=0.4)
+# Add text labels at the end of each bar
+for index, value in enumerate(adds_per_playlist):
+    ax.text(value + 1, index, str(value), color='white', va='center', ha='left')
 
 # Remove spines
 for location in ['left', 'right', 'top', 'bottom']:
     ax.spines[location].set_visible(False)
 
 st.pyplot(fig)
-

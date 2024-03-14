@@ -104,6 +104,6 @@ fig.update_traces(
 )
 st.write('Hover over chart to check playlist position on release.')
 # Show the figure in Streamlit
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
  

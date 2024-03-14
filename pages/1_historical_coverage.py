@@ -66,12 +66,24 @@ st.markdown(
     """
 <style>
 [data-testid="stMetricValue"] {
-    font-size: 12px;
+    font-size: 15px;
 }
 </style>
 """,
     unsafe_allow_html=True,
 )
+
+# Remove download and other buttons from all Dataframes
+st.markdown(
+                """
+                <style>
+                [data-testid="stElementToolbar"] {
+                    display: none;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
 
 #######################
 # HIGHEST REACH METRIC 
@@ -97,7 +109,8 @@ else:
 
 # Display result
 with col2:
-    st.metric(label="Highest Reach", value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across playlist adds. Only based on the tracked playlists.', delta_color='normal')
+    label = ":grey[Highest Reach]"
+    st.metric(label=label, value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across AU playlist adds. Only based on the tracked playlists.', delta_color='normal')
 
 
 #######################
@@ -117,6 +130,7 @@ most_added_titles = title_counts[title_counts == max_adds].index.tolist()
 most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(subset=['Title', 'Artist'])
 
 # Format the artist names
+
 if len(most_added_artists_df) > 1:
     artist_names = " & ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " and " + most_added_artists_df['Artist'].tolist()[-1]
 else:
@@ -124,7 +138,8 @@ else:
 
 # Display the result
 with col2:
-    st.metric(label="Most Added", value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
+    label = ":grey[Most Added]"
+    st.metric(label=label, value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
 
 ####################################
 # HIGHEST AVERAGE PLAYLIST POSITION 
@@ -143,7 +158,8 @@ best_artist = best_avg_playlist_position_by_artist[1]  # Access the second eleme
 best_avg = avg_position.min()
 
 with col2:
-    st.metric(label="Highest Average Playlist Position", value=f"{best_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new playlist additions')
+    label = ":grey[Highest Average Playlist Position]"
+    st.metric(label=label, value=f"{best_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new AU playlist additions')
     
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
@@ -202,7 +218,7 @@ fig.update_layout(
             size=16,
             color="#FAFAFA"
         ),
-        y=0.8,  # Adjust the title's position on the y-axis
+        y=0.85,  # Adjust the title's position on the y-axis
         x=0.5,  # Center the title on the x-axis
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
@@ -212,7 +228,7 @@ fig.update_layout(
     
     )
 # Display the figure in Streamlit
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 ########################
 # SEARCH ADDS BY SONG
@@ -239,7 +255,7 @@ ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}")
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
-st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=True, hide_index=True)
+st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
 
 st.write('- - - - - -') 
 
@@ -255,8 +271,21 @@ selected_playlist = st.selectbox('Select Playlist:', playlist_choices, key='play
 # Filter DataFrame based on the selected playlist
 filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 
-# Display all songs in the selected playlist
-st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
+#testing this for mobile no horizontal scroll
+st.data_editor(
+    data=filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True),
+    disabled=True,  # Ensures data cannot be edited
+    use_container_width=False,  # Adjust based on your layout needs
+    column_config={
+        "Artist": {"width": 150},  # Set tighter width
+        "Title": {"width": 120},   # Set width 
+        "Position": {"width": 58}
+    },
+    hide_index=True
+)
+
+# # Display all songs in the selected playlist
+# st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
 
 
 
