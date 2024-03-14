@@ -24,6 +24,7 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=5, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=6, minute=38))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=7, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=7, minute=5))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=8, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=8, minute=15))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=8, minute=45))
