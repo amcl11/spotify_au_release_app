@@ -210,16 +210,16 @@ fig.update_layout(
     xaxis_tickangle=-30,
     # plot_bgcolor='rgba(0,0,0)',
     # paper_bgcolor='rgb(0,0,0)',  # black paper background for the entire figure
-    margin=dict(t=100),
+    margin=dict(t=10),
     title=dict(
         text='Top 5 Highest Reach',
         font=dict(
             family="Aria, sans-serif",
-            size=16,
+            size=14,
             color="#FAFAFA"
         ),
-        y=0.85,  # Adjust the title's position on the y-axis
-        x=0.5,  # Center the title on the x-axis
+        y=1,  # Adjust the title's position on the y-axis
+        x=0.6,  # Center the title on the x-axis
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
         

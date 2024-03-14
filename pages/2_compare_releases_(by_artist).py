@@ -102,7 +102,19 @@ fig.update_traces(
                   "<b>Playlist Reach:</b> %{y:,.0f}<br>" + 
                   "<b>Position:</b> %{customdata[0]}<extra></extra>"  # %{customdata[0]} accesses the first item in custom data
 )
-st.write('Hover over chart to check playlist position on release.')
+st.write(
+        """
+        <style>
+            .my-text {
+                font-size: 11px;
+                font-family: monospace;
+            }
+        </style>
+        <p class="my-text">Hover over chart to check playlist position on release:</p>
+        """,
+        unsafe_allow_html=True,
+    )
+
 # Show the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 

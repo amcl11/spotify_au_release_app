@@ -9,8 +9,7 @@ from theme import set_theme
 from sqlalchemy import create_engine, text
 import os
 
-# set_theme() # Backup option if config theme setting don't work
-
+# Set right aligned note about Desktop viewing 
 col1, col2, col3 = st.columns([6, 6, 6])
 
 with col3:
@@ -179,6 +178,20 @@ for i in range(len(lowest_avg_position)):
     with col1:
         st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}", help='Averages all positions across any new AU playlist additions')
 
+st.write("----")
+st.write(
+        """
+        <style>
+            .my-text {
+                font-size: 11px;
+                font-family: monospace;
+            }
+        </style>
+        <p class="my-text">Hover over chart to check playlist details:</p>
+        """,
+        unsafe_allow_html=True,
+    )
+
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
@@ -228,16 +241,16 @@ fig.update_layout(
     xaxis_tickangle=-30,
     # plot_bgcolor='rgba(0,0,0)',
     # paper_bgcolor='rgb(0,0,0)',  # black paper background for the entire figure
-    margin=dict(t=100),
+    margin=dict(t=10),
     title=dict(
         text='Top 5 Highest Reach',
         font=dict(
             family="Aria, sans-serif",
-            size=16,
+            size=14,
             color="#FAFAFA"
         ),
-        y=0.8,  # Adjust the title's position on the y-axis
-        x=0.5,  # Center the title on the x-axis
+        y=0.95,  # Adjust the title's position on the y-axis
+        x=0.65,  # Center the title on the x-axis
         xanchor='center',  # Use the center of the title for x positioning
         yanchor='top'  # Anchor the title to the top of the layout
         
