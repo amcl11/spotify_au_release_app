@@ -353,7 +353,7 @@ cols = [col1, col2]
 # Total number of playlists remains the same
 total_playlists = len(new_cover_artist_df)
 
-# Iterate over DataFrame rows as before
+# Iterate over DataFrame rows 
 for index, row in new_cover_artist_df.iterrows():
     playlist_name = row['Playlist']
     artist_name = row['Cover_Artist']

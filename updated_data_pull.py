@@ -177,13 +177,16 @@ def data_pull():
         'filtered_cover_art_dict': filtered_cover_art_dict,
         'cover_artist_dict': cover_artist_dict
     }
+    logging.info("cover_info_data collected successfully. Details: %s", str(cover_info_data))
 
     cover_info_df = pd.DataFrame({
             'Playlist': list(cover_info_data['filtered_cover_art_dict'].keys()),
             'Cover Art URL': list(cover_info_data['filtered_cover_art_dict'].values()),
             'Featured Artist': list(cover_info_data['cover_artist_dict'].values())
         })
-
+    unique_playlists = cover_info_df['Playlist'].unique().tolist()  # Convert to list for better readability in log
+    logging.info("Unique playlists with cover art and artist details: %s", unique_playlists)
+    
     todays_date = datetime.today()
     formatted_date = todays_date.strftime('%Y-%m-%d') # Format the date as a string in 'YYYY-MM-DD' format
 
