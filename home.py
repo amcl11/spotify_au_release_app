@@ -191,7 +191,7 @@ st.write(
                 font-family: monospace;
             }
         </style>
-        <p class="my-text">Hover over chart to check playlist details:</p>
+        <p class="my-text">Hover over chart to check playlist details</p>
         """,
         unsafe_allow_html=True,
     )

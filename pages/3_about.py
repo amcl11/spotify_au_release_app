@@ -12,29 +12,26 @@ This site streamlines Friday morning playlist checking for those interested in N
     
 The process involves retrieving all songs that have been added to *New Music Friday AU & NZ*. These songs are then reviewed to check whether they have also been added to key Australian editorial playlists. 
     
-*Note:* The historical coverage is a snapshot of Playlist adds between Friday (release) ==> Wednesday 9.00am AEST. 
+*Historical coverage is a snapshot of playlist adds between Friday (release) ==> Wednesday 9.00am AEST. 
     
 """)
 
 st.write('- - - - - -') 
-# Features
-st.header('Features')
+# # Features
+# st.header('Features')
 st.write("""
-- Search adds by song. 
-- Search adds by playlist.
-- See which artists are featured on playlist covers.
-- Artist(s) with the most playlist adds
-- Artist(s) with the highest average playlist position
-- Artist(s) with the highest reach (total playlist likes across each playlist the artist was added to) 
-- Distribution of adds per playlist
-- Playlist cover images and cover artists 
-- Compare releases (by artist) 
+- Artist(s) with the `highest reach` (total playlist likes across each playlist the artist was added to) 
+- Artist(s) with the `most playlist adds`
+- Artist(s) with the `highest average playlist position`
+
+- Search `adds by song`. 
+- Search `adds by playlist`.
+- See which artists are featured on `playlist covers`.
+- `Compare releases (by artist)` 
 """)
-
-st.write('- - - - - -') 
+st.write("")
 # List of playlists tracked
-st.header('Playlists Tracked')
-
+st.subheader('Playlists Tracked:')
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -81,10 +78,10 @@ st.write("")
 
 
 # Display the input field and submit button
-st.write("If you'd like another playlist considered for tracking, submit it's playlist ID below:")
+st.write("If you'd like another playlist considered for tracking submit it's playlist ID below:")
 
 st.markdown("""
-### How to Submit a Spotify Playlist ID:
+#### Submit a Spotify Playlist ID:
 
 1. In Spotify, navigate to the playlist you'd like to submit.
 2. Click the three dots (near the play and shuffle buttons) to open the options menu.
@@ -111,12 +108,9 @@ if submit_button:
 
 
 
-st.write('- - - - - -') 
 
-  # Additional Information
-st.subheader('Additional Information')
-st.write("""
-Developer's source code here: 
-    """)
 
-st.link_button(label='Github', url='https://github.com/amcl11/spotify_au_release_app')
+
+
+
+

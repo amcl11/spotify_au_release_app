@@ -31,6 +31,7 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=10, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=10, minute=10))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=10, minute=15))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=11, minute=00))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=30))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=1))
