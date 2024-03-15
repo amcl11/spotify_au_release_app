@@ -35,8 +35,16 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=8, minute=15))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=8, minute=45))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=9, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=9, minute=11))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=9, minute=23))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=9, minute=30))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=9, minute=38))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=9, minute=55))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=10, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=10, minute=10))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=10, minute=15))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=33))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=40))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=1))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=2))
@@ -48,6 +56,7 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=15))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=20))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=30))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=16, minute=19))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=16, minute=30))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=17, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=22, minute=0))
@@ -86,15 +95,35 @@ def data_pull():
     playlist_id = '37i9dQZF1DWT2SPAYawYcO'
 
     print('Fetching Spotify data...')
+    
     # Fetches track names and artist names from New Music Friday AU & NZ
     # Returns a list of tuples, each containing a track name and concatenated artist names.
     # Example, [('Foam', 'Royel Otis'),('One More Night', 'KUČKA, Flume')]
     track_details = get_playlist_tracks_and_artists(sp, playlist_id)
     print(f'Fetched {len(track_details)} track details from New Music Friday AU & NZ playlist.')
+    
     # Uses`track_details` from above and `playlists_dict' (loaded JSON file)
     # Finds the positions of each track in multiple playlists
     track_positions = find_tracks_positions_in_playlists(sp, track_details, playlists_dict)
-    print(f'Track positions found for {len(track_positions)} tracks.')
+    print(f'Track positions in other playlists found for {len(track_positions)} tracks.')
+    
+    ###########################################
+    ###########################################
+    ###########################################
+    # troubleshooting missing Get Popped! info...
+    file_name = 'track_positions.json'
+
+    try:
+        with open(file_name, 'w') as file:
+            json.dump(track_positions, file, indent=4)
+        print(f"Track positions successfully exported to {file_name}")
+    except Exception as e:
+        print(f"Error exporting track positions: {e}")  
+    
+    ###########################################
+    ###########################################
+    ###########################################
+    
     # Fetching playlist follower counts
     # Dictionary to store follower counts
     playlist_followers = {}
@@ -110,7 +139,7 @@ def data_pull():
     # Create and save fetched data as a DataFrame
     rows = []
 
-    for track_id, track_info in track_positions.items():
+    for _, track_info in track_positions.items():
         artist_name = track_info['artist_name']
         track_name = track_info['track_name']
         for playlist_info in track_info['playlists']:
@@ -128,8 +157,10 @@ def data_pull():
 
     # Convert the list of rows into a DataFrame
     df = pd.DataFrame(rows)
-
+    # Get the unique values from the 'Playlist' column
+    unique_playlists_in_df = df['Playlist'].unique()
     logging.info("Initial DataFrame created successfully ")
+    logging.info(f'Unique Playlists In First DF: {unique_playlists_in_df}')
 
     # Start collecting data for the Cover Art and Cover Artist info
     #Fetch Playlist image URLs
@@ -207,7 +238,7 @@ def data_pull():
     df.insert(0, 'Date', formatted_date)
     cover_info_df.insert(0, 'Date', formatted_date)
 
-    merged_df = pd.merge(df, cover_info_df, on=['Date', 'Playlist'], how='left')
+    merged_df = pd.merge(df, cover_info_df, on=['Date', 'Playlist'], how='outer')
 
     # rename columns to match DB 
     rename_mapping = {

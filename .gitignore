@@ -29,4 +29,8 @@ log.txt
 *.sql
 
 user_input.json
+track_positions.json 
+
+latest.dump
+# Postgres db backup file (prior to updating column contraints)
 
