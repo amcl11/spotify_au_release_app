@@ -34,22 +34,13 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=12, minute=30))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=1))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=2))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=3))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=4))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=5))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=6))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=7))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=8))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=9))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=10))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=15))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=20))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=15, minute=30))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=16, minute=0))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=16, minute=30))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=17, minute=0))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=17, minute=45))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=22, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='sat', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='sun', hour=6, minute=0))
@@ -102,14 +93,14 @@ def data_pull():
     ###########################################
     ###########################################
     # troubleshooting missing Get Popped! info...
-    file_name = 'track_positions.json'
+    # file_name = 'track_positions.json'
 
-    try:
-        with open(file_name, 'w') as file:
-            json.dump(track_positions, file, indent=4)
-        print(f"Track positions successfully exported to {file_name}")
-    except Exception as e:
-        print(f"Error exporting track positions: {e}")  
+    # try:
+    #     with open(file_name, 'w') as file:
+    #         json.dump(track_positions, file, indent=4)
+    #     print(f"Track positions successfully exported to {file_name}")
+    # except Exception as e:
+    #     print(f"Error exporting track positions: {e}")  
     
     ###########################################
     ###########################################
@@ -213,7 +204,7 @@ def data_pull():
         'filtered_cover_art_dict': filtered_cover_art_dict,
         'cover_artist_dict': cover_artist_dict
     }
-    logging.info("cover_info_data collected successfully. Details: %s", str(cover_info_data))
+    # logging.info("cover_info_data collected successfully. Details: %s", str(cover_info_data))
 
     cover_info_df = pd.DataFrame({
             'Playlist': list(cover_info_data['filtered_cover_art_dict'].keys()),
@@ -254,9 +245,9 @@ def data_pull():
     DATABASE_URL = os.getenv('DATABASE_URL')
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-        logging.info("Updated DATABASE_URL to use 'postgresql://'")
+        # logging.info("Updated DATABASE_URL to use 'postgresql://'")
 
-    logging.info("Connecting to the database.")
+    logging.info("Connecting to db.")
     engine = create_engine(DATABASE_URL)
 
     # Only one block for calculating the upload date
@@ -289,7 +280,7 @@ def data_pull():
                 # Ensure 'merged_df' has the correct 'Date' set to 'upload_date' before insertion
                 merged_df['Date'] = upload_date
                 
-                logging.info(f"Preview of merged_df before insertion:\n{merged_df.head()}")
+                # logging.info(f"Preview of merged_df before insertion:\n{merged_df.head()}")
                 
                 merged_df.to_sql('nmf_spotify_coverage', con=engine, if_exists='append', index=False)
             
@@ -304,8 +295,6 @@ def data_pull():
     logging.info("Database upload completed.")
     
     pass
-
-
 
 if __name__ == "__main__":
     schedule()
