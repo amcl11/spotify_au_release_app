@@ -251,7 +251,7 @@ def data_pull():
     logging.info("Connecting to db.")
     engine = create_engine(DATABASE_URL)
 
-    # Only one block for calculating the upload date
+    # Calculating the upload date
     now = datetime.now()
     weekday = now.weekday()
 
@@ -283,9 +283,11 @@ def data_pull():
                 
                 # logging.info(f"Preview of merged_df before insertion:\n{merged_df.head()}")
                 
+                # Count amount of new rows being insterted for comparison to deletion 
+                inserted_row_count = len(merged_df)    
                 merged_df.to_sql('nmf_spotify_coverage', con=engine, if_exists='append', index=False)
             
-                logging.info("New data inserted successfully.")
+                logging.info(f"Inserted {inserted_row_count} new records successfully.")
                 trans.commit()
                 logging.info("Database transaction committed.")
             except Exception as e:

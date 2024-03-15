@@ -110,7 +110,7 @@ st.write(
                 font-family: monospace;
             }
         </style>
-        <p class="my-text">Hover over chart to check playlist position on release:</p>
+        <p class="my-text">Hover over chart to check playlist position on release week:</p>
         """,
         unsafe_allow_html=True,
     )

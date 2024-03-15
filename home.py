@@ -348,7 +348,7 @@ filtered_playlist_df = latest_friday_df[latest_friday_df['Playlist'] == selected
 
 # Check if 'Artist' and 'Title' columns only contain None values
 if filtered_playlist_df[['Artist', 'Title']].isnull().all(axis=None):
-    st.markdown(f"<span style='color: #FAFAFA;'>No New Releases added to <span style='color: salmon;'>**{selected_playlist}**</span>", unsafe_allow_html=True)
+    st.markdown(f"<span style='color: #FAFAFA;'>No New Releases added to <span style='color: salmon;'>**{selected_playlist}**</span> that were also added to NMF AU & NZ</span>", unsafe_allow_html=True)
 
 
 
