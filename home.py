@@ -42,6 +42,16 @@ left_column.image('images/nmf_logo_transparent_background.png')
 st.write('This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.')
 st.write('All songs added to *New Music Friday AU & NZ* are fetched, and then checked against key AU editorial playlists.')  
 st.write('For more info and the list of playlists that are tracked, check the About page.')  
+st.markdown("""
+    <style>
+    .small-font {
+        font-size: 13px;
+    }
+    </style>
+    
+    <p class="small-font">Note: This means New Releases that did not get added to NMF AU & NZ will not show up on this site. Focusing on the releases that Spotify has chosen to feature in NMF.</p>
+    """, unsafe_allow_html=True)
+
 st.write('---')  # Add a visual separator
 
 ##################################
