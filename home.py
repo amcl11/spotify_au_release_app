@@ -49,7 +49,7 @@ st.markdown("""
     }
     </style>
     
-    <p class="small-font">Note: This means New Releases that did not get added to NMF AU & NZ will not show up on this site. Focusing on the releases that Spotify has chosen to feature in NMF.</p>
+    <p class="small-font">Note: This means New Releases that did not get added to NMF AU & NZ will not show up on this site - focusing on the releases that Spotify has chosen to feature in NMF.</p>
     """, unsafe_allow_html=True)
 
 st.write('---')  # Add a visual separator
