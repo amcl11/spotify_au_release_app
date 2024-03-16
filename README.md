@@ -7,7 +7,7 @@
 
 The site pulls all songs added to New Music Friday AU & NZ, and then checks to see if these songs have also been added to any key editorial AU playlists.
 
-This means New Releases that did not get added to NMF AU & NZ will not show up on this site. Focusing on the releases that Spotify has chosen to feature in NMF. 
+This means New Releases that did not get added to NMF AU & NZ will not show up on this site - focusing on the releases that Spotify has chosen to feature in NMF. 
 
 ## List of playlists currently checking: 
 
@@ -30,11 +30,29 @@ This means New Releases that did not get added to NMF AU & NZ will not show up o
 |--------------------------------|
 | triple j's New Music Hitlist   |
 
+----
+## Example features:
 
+![Release Overview](images/release_snapshot_screenshot.png)
+----
 
+![Top 5 Highest Reach](images/top_5_highest_reach_screenshot.png)
+----
+
+![Search Adds by song](images/search_adds_by_song_screenshot.png)
 -----
 
-### Prerequisites
+![Search adds by playlist](images/search_by_playlist_screenshot.png)
+----
+
+##### Release Comparision (By Artist):
+![Release Comparision (By Artist)](images/release_comparison_hover_screenshot.png)
+----
+
+![Adds By Playlist](images/adds_by_playlist_graph_screenshot.png)
+----
+
+### Prerequisites:
 
 Before you can run this project locally, make sure you have the following installed:
 - Python (3.8 or later)
@@ -42,7 +60,7 @@ Before you can run this project locally, make sure you have the following instal
 - A Spotify Developer account and API credentials (Client ID and Client Secret). You can create a Spotify Developer account and obtain your API credentials by following the guide [here](https://developer.spotify.com/documentation/web-api/tutorials/getting-started).
 
 ----
-### Installation
+### Installation:
 
 1. **Clone the repository**
 
@@ -86,7 +104,7 @@ Before you can run this project locally, make sure you have the following instal
    CLIENT_SECRET='your_spotify_client_secret'
    ```
 ---
-### Running Locally
+### Running Locally:
 
 To run the project locally, ensure you're in the project root directory and your virtual environment is activated. Then start the application. 
 ```bash

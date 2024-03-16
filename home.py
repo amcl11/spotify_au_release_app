@@ -337,7 +337,9 @@ filtered_df = latest_friday_df[latest_friday_df['Artist_Title'] == selected_arti
 
 # Continue with sorting and displaying the data as before
 ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
-ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
+
+# Before displaying, round 'Followers' to no decimal places and format
+ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{round(x):,}" if pd.notnull(x) else "N/A")
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
