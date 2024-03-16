@@ -143,7 +143,10 @@ def data_pull():
     # Get the unique values from the 'Playlist' column
     unique_playlists_in_df = df['Playlist'].unique()
     logging.info("Initial DataFrame created successfully ")
-    logging.info(f'Unique Playlists In First DF: {unique_playlists_in_df}')
+    
+    for playlist in unique_playlists_in_df:
+        logging.info(f'Unique Playlist In First DF: {playlist}')
+
 
     # Start collecting data for the Cover Art and Cover Artist info
     #Fetch Playlist image URLs
@@ -212,9 +215,11 @@ def data_pull():
             'Cover Art URL': list(cover_info_data['filtered_cover_art_dict'].values()),
             'Featured Artist': list(cover_info_data['cover_artist_dict'].values())
         })
-    unique_playlists = cover_info_df['Playlist'].unique().tolist()  # Convert to list for better readability in log
-    logging.info("Unique playlists with cover art and artist details: %s", unique_playlists)
+    unique_playlists = cover_info_df['Playlist'].unique().tolist()
     
+    for playlist in unique_playlists:
+        logging.info(f"Unique playlist with cover art and artist details: {playlist}")
+
     todays_date = datetime.today()
     formatted_date = todays_date.strftime('%Y-%m-%d') # Format the date as a string in 'YYYY-MM-DD' format
 
@@ -239,7 +244,6 @@ def data_pull():
 
     # Convert the DataFrame 'Date' column to datetime and format it as needed
     merged_df['Date'] = pd.to_datetime(merged_df['Date']).dt.strftime('%Y-%m-%d')
-
 
     # Database upload
     ####################
