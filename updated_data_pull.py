@@ -57,6 +57,7 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=10, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=11, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=12, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=14, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='tue', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='wed', hour=9, minute=0))
 
