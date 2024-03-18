@@ -29,7 +29,7 @@ st.write("""
 - Search `adds by song`. 
 - Search `adds by playlist`.
 - See which artists are featured on `playlist covers`.
-- `Compare releases (by artist)` 
+- `Release comparison (by artist)` 
 """)
 st.write("")
 # List of playlists tracked

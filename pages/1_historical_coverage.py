@@ -131,7 +131,7 @@ most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(
 
 # Format the artist names
 if len(most_added_artists_df) > 1:
-    artist_names = " & ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " and " + most_added_artists_df['Artist'].tolist()[-1]
+    artist_names = " | ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " | " + most_added_artists_df['Artist'].tolist()[-1]
 else:
     artist_names = most_added_artists_df['Artist'].iloc[0]
 
@@ -139,6 +139,10 @@ else:
 with col2:
     label = ":grey[Most Added]"
     st.metric(label=label, value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
+
+
+
+
 
 ####################################
 # HIGHEST AVERAGE PLAYLIST POSITION 
@@ -260,41 +264,12 @@ fig.update_layout(
     showlegend=False  # Optionally hide the legend if not needed
 )
 
-
 # Display the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 ########################
 # SEARCH ADDS BY SONG
 ########################
-
-#PREVIOUS CODE#
-# st.subheader('Search Adds By Song:')
-
-# # Combine Artist & Title for the first dropdown box: 
-# df['Artist_Title'] = df['Artist'] + " - " + df['Title']
-# choices = df['Artist_Title'].unique()
-
-# # Sort the choices in alphabetical order before displaying in the dropdown
-# sorted_choices = sorted(choices, key=lambda x: x.lower())
-
-# # Dropdown for user to select an artist and title
-# selected_artist_title = st.selectbox('Select New Release:', sorted_choices)
-
-# # Filter DataFrame based on selection, then drop unnecessary columns for display
-# filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
-
-# # Order the filtered_df by 'Followers' in descending order
-# ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
-
-# # Format the 'Followers' column to include commas for thousands
-# ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}")
-
-# # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
-# st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
-
-# st.write('- - - - - -') 
-
 
 st.subheader('Search Adds By Song:')
 
@@ -332,27 +307,6 @@ st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_con
 ###########################
 # SEARCH ADDS BY PLAYLIST
 ###########################
-# st.subheader('Search Adds By Playlist:')
-
-# playlist_choices = sorted(df['Playlist'].unique(), key=lambda x: x.lower())
-
-# selected_playlist = st.selectbox('Select Playlist:', playlist_choices, key='playlist_select')
-
-# # Filter DataFrame based on the selected playlist
-# filtered_playlist_df = df[df['Playlist'] == selected_playlist]
-
-# #testing this for mobile no horizontal scroll
-# st.data_editor(
-#     data=filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True),
-#     disabled=True,  # Ensures data cannot be edited
-#     use_container_width=False,  # Adjust based on your layout needs
-#     column_config={
-#         "Artist": {"width": 150},  # Set tighter width
-#         "Title": {"width": 120},   # Set width 
-#         "Position": {"width": 58}
-#     },
-#     hide_index=True
-# )
 
 st.write("")
 st.subheader('Search Adds By Playlist:')
@@ -369,8 +323,6 @@ filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 if filtered_playlist_df[['Artist', 'Title']].isnull().all(axis=None):
     st.markdown(f"<span style='color: #FAFAFA;'>No New Releases added to <span style='color: salmon;'>**{selected_playlist}**</span> that were also added to NMF AU & NZ</span>", unsafe_allow_html=True)
 
-
-
 else:
     sorted_df = filtered_playlist_df.sort_values(by='Position', ascending=True)
     # Clean the DataFrame to replace None with 'N/A' for display
@@ -386,7 +338,6 @@ else:
         },
         hide_index=True
     )
-
 
 
 # # Display all songs in the selected playlist

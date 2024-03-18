@@ -40,7 +40,7 @@ left_column, middle_column, right_column = st.columns(3)
 left_column.image('images/nmf_logo_transparent_background.png')
 
 st.write('This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.')
-st.write('All songs added to *New Music Friday AU & NZ* are fetched, and then checked against key AU editorial playlists.')  
+st.markdown("All songs added to <span style='color: salmon;'>New Music Friday AU & NZ</span> are fetched, and then checked against key AU editorial playlists.", unsafe_allow_html=True)
 st.write('For more info and the list of playlists that are tracked, check the About page.')  
 st.markdown("""
     <style>
