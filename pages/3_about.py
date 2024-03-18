@@ -11,11 +11,12 @@ st.write("""
 This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.
     
 The process involves retrieving all songs that have been added to <span style='color: salmon;'>New Music Friday AU & NZ</span>. These songs are then reviewed to check whether they have also been added to key Australian editorial playlists. 
+ 
+This means New Releases that did not get added to NMF AU & NZ will not show up on this site - focusing on the releases that Spotify has chosen to feature in NMF.
     
 *Historical coverage is a snapshot of playlist adds between Friday (release) → Wednesday 9.00am AEST. 
     
 """, unsafe_allow_html=True)
-
 
 st.write('- - - - - -') 
 # # Features

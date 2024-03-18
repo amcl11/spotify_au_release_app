@@ -130,7 +130,6 @@ most_added_titles = title_counts[title_counts == max_adds].index.tolist()
 most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(subset=['Title', 'Artist'])
 
 # Format the artist names
-
 if len(most_added_artists_df) > 1:
     artist_names = " & ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " and " + most_added_artists_df['Artist'].tolist()[-1]
 else:
@@ -368,7 +367,7 @@ filtered_playlist_df = df[df['Playlist'] == selected_playlist]
 
 # Check if 'Artist' and 'Title' columns only contain None values
 if filtered_playlist_df[['Artist', 'Title']].isnull().all(axis=None):
-    st.markdown(f"<span style='color: #FAFAFA;'>No New Releases added to <span style='color: salmon;'>**{selected_playlist}**</span>", unsafe_allow_html=True)
+    st.markdown(f"<span style='color: #FAFAFA;'>No New Releases added to <span style='color: salmon;'>**{selected_playlist}**</span> that were also added to NMF AU & NZ</span>", unsafe_allow_html=True)
 
 
 

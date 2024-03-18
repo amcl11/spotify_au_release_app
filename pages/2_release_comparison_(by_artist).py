@@ -31,7 +31,7 @@ def fetch_data_for_selected_artist(artist_name):
     artist_data_df = pd.read_sql_query(query, engine, params=(artist_name,))
     return artist_data_df
 
-st.subheader('Compare releases by artist:')
+st.subheader('Release Comparison (By Artist):')
 st.write('*Data available from 23rd Feb 2024 onwards*')
 st.markdown(
     '<p style="font-size: 14px;">*This site only tracks releases that were added to NMF AU & NZ</p>', 

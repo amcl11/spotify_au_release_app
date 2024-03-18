@@ -45,7 +45,7 @@ st.write('For more info and the list of playlists that are tracked, check the Ab
 st.markdown("""
     <style>
     .small-font {
-        font-size: 13px;
+        font-size: 14px;
     }
     </style>
     
