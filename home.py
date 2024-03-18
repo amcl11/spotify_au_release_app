@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import json
 import plotly.express as px
-from theme import set_theme
 from sqlalchemy import create_engine, text
 import os
 
