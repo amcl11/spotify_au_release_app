@@ -40,7 +40,7 @@ left_column.image('images/nmf_logo_transparent_background.png')
 
 st.write('This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.')
 st.markdown("All songs added to <span style='color: white;'>*New Music Friday AU & NZ*</span> are fetched, and then checked against key AU editorial playlists.", unsafe_allow_html=True)
-st.write('For more info and the list of playlists that are tracked, check the About page.')  
+st.write("For more info and the list of playlists that are tracked, check the *about* page.")  
 st.markdown("""
     <style>
     .small-font {
@@ -392,8 +392,11 @@ new_cover_artist_df = filtered_df.groupby('Playlist').agg({
 
 final_cover_artist_df = new_cover_artist_df[['Playlist', 'Cover_Artist']]
 
+# renamed column for display
+display_df = final_cover_artist_df.rename(columns={'Cover_Artist': 'Cover Artist'})
+
 st.subheader('Cover Artists:')
-st.dataframe(final_cover_artist_df, use_container_width=False, hide_index=True)
+st.dataframe(display_df, use_container_width=False, hide_index=True)
 
 st.write("") # padding 
 st.write("*Cover artist may update before cover images*")
