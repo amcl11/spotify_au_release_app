@@ -124,6 +124,32 @@ st.markdown(
 # HIGHEST REACH METRIC 
 #######################
 
+# # Group by 'Title' and 'Artist', then sum the 'Followers' column
+# highest_reach = latest_friday_df.groupby(['Title', 'Artist'])['Followers'].sum().reset_index(name='Reach')
+
+# # Find the maximum reach
+# max_reach = highest_reach['Reach'].max()
+
+# # Filter to get the titles with the maximum reach
+# highest_reach_max = highest_reach[highest_reach['Reach'] == max_reach].reset_index(drop=True)
+
+# # Display the 'Highest Reach' title(s) and artist(s) as metrics in col1
+# for i in range(len(highest_reach_max)):
+#     title, artist, reach = highest_reach_max.iloc[i]['Title'], highest_reach_max.iloc[i]['Artist'], highest_reach_max.iloc[i]['Reach']
+#     with col1:
+#         st.metric(
+#     label=":gray[Highest Reach]",
+#     value=f"{artist} - '{title}'",
+#     delta="{:,}".format(int(reach)),  # Format 'reach' with commas and no decimal places
+#     help='Total reach across AU playlist adds. Only based on the tracked playlists.'
+# )
+
+######testing####
+#######################
+# HIGHEST REACH METRIC 
+#######################
+
+# Assuming latest_friday_df is your DataFrame
 # Group by 'Title' and 'Artist', then sum the 'Followers' column
 highest_reach = latest_friday_df.groupby(['Title', 'Artist'])['Followers'].sum().reset_index(name='Reach')
 
@@ -133,44 +159,120 @@ max_reach = highest_reach['Reach'].max()
 # Filter to get the titles with the maximum reach
 highest_reach_max = highest_reach[highest_reach['Reach'] == max_reach].reset_index(drop=True)
 
-# Display the 'Highest Reach' title(s) and artist(s) as metrics in col1
-for i in range(len(highest_reach_max)):
-    title, artist, reach = highest_reach_max.iloc[i]['Title'], highest_reach_max.iloc[i]['Artist'], highest_reach_max.iloc[i]['Reach']
-    with col1:
-        st.metric(
-    label=":gray[Highest Reach]",
-    value=f"{artist} - '{title}'",
-    delta="{:,}".format(int(reach)),  # Format 'reach' with commas and no decimal places
-    help='Total reach across AU playlist adds. Only based on the tracked playlists.'
-)
+# Collect all artist-title pairs into a list (without including the reach value)
+artist_title_pairs = [f"{row['Artist']} - '{row['Title']}'" for _, row in highest_reach_max.iterrows()]
 
+# Sort the list alphabetically
+artist_title_pairs.sort()
+
+# Prepare the HTML string without bullet points, using line breaks to separate items
+artist_title_html = "<div style='margin-top: -10px;'>" + "<br>".join(artist_title_pairs) + "</div>"
+
+# Display the metric with the label and the delta (total reach)
+with col1:
+    st.metric(label=":grey[Highest Reach]", value="", delta=f"{round(max_reach):,}", help='Total reach across AU playlist adds. Only based on the tracked playlists.')
+
+# Use markdown to display the artist-title pairs underneath the metric
+    st.markdown(artist_title_html, unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+
+
+#######################
+# MOST ADDED METRIC - old
+#######################
+
+# # Use latest_friday_df from earlier in the code
+# # Find the titles with the most entries
+# most_added = latest_friday_df.groupby(['Title', 'Artist']).size().reset_index(name='Count')
+# max_count = most_added['Count'].max()
+# most_added_max = most_added[most_added['Count'] == max_count].reset_index(drop=True)
+
+# # Use a variable to track if the label has been displayed
+# label_displayed = False
+
+# for i, (index, row) in enumerate(most_added_max.iterrows()):
+#     title, artist = row['Title'], row['Artist']
+#     # For the first item, display the label
+#     if i == 0:
+#         label = ":grey[Most Added]"
+#     else:
+#         # For subsequent items, check if the title is different.
+#         # If it is, update the label to be displayed; if not, keep the label empty
+#         label = "" if title == most_added_max.iloc[i-1]['Title'] else":grey[Most Added]"
+
+#     with col1:
+#         st.metric(label=label, value=f"{artist} - '{title}'", delta=f"Added to {max_count} playlists")
+        
+
+####testing####
 #######################
 # MOST ADDED METRIC
 #######################
 
-# Use latest_friday_df from earlier in the code
+# Assuming latest_friday_df is your DataFrame
 # Find the titles with the most entries
 most_added = latest_friday_df.groupby(['Title', 'Artist']).size().reset_index(name='Count')
 max_count = most_added['Count'].max()
 most_added_max = most_added[most_added['Count'] == max_count].reset_index(drop=True)
 
-# Use a variable to track if the label has been displayed
-label_displayed = False
+# Collect all artist-title pairs into a list
+artist_title_pairs = [f"{row['Artist']} - '{row['Title']}'" for _, row in most_added_max.iterrows()]
 
-for i, (index, row) in enumerate(most_added_max.iterrows()):
-    title, artist = row['Title'], row['Artist']
-    # For the first item, display the label
-    if i == 0:
-        label = ":grey[Most Added]"
-    else:
-        # For subsequent items, check if the title is different.
-        # If it is, update the label to be displayed; if not, keep the label empty
-        label = "" if title == most_added_max.iloc[i-1]['Title'] else":grey[Most Added]"
+# Sort the list alphabetically
+artist_title_pairs.sort()
 
-    with col1:
-        st.metric(label=label, value=f"{artist} - '{title}'", delta=f"Added to {max_count} playlists")
-        
+# Prepare the HTML string without bullet points, using line breaks to separate items
+artist_title_html = "<div style='margin-top: -10px;'>" + "<br>".join(artist_title_pairs) + "</div>"
 
+# Display the metric with the label and the delta
+with col1:
+    st.metric(label=":grey[Most Added]", value="", delta=f"Added to {max_count} playlists")
+
+# Use markdown to display the artist-title pairs underneath the metric
+    st.markdown(artist_title_html, unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+
+
+
+
+
+####################################
+# HIGHEST AVERAGE PLAYLIST POSITION 
+####################################
+
+# # Use latest_friday_df from earlier in the code
+# # Group by 'Title' and 'Artist', then find the average 'Position'
+# avg_position = latest_friday_df.groupby(['Title', 'Artist'])['Position'].mean().reset_index(name='AvgPosition')
+
+# # Find the minimum average position
+# min_avg_position = avg_position['AvgPosition'].min()
+
+# # Filter to get the titles and artists with the minimum average position
+# lowest_avg_position = avg_position[avg_position['AvgPosition'] == min_avg_position].reset_index(drop=True)
+
+# # Display the title(s) and artist(s) with the lowest average position as metrics in col1
+# for i in range(len(lowest_avg_position)):
+#     title, artist = lowest_avg_position.iloc[i]['Title'], lowest_avg_position.iloc[i]['Artist']
+#     with col1:
+#         st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}", help='Averages all positions across any new AU playlist additions')
+
+# st.write("----")
+# st.write(
+#         """
+#         <style>
+#             .my-text {
+#                 font-size: 11px;
+#                 font-family: monospace;
+#             }
+#         </style>
+#         <p class="my-text">Hover over chart to check playlist details</p>
+#         """,
+#         unsafe_allow_html=True,
+#     )
+
+#####testing#####
 ####################################
 # HIGHEST AVERAGE PLAYLIST POSITION 
 ####################################
@@ -185,29 +287,40 @@ min_avg_position = avg_position['AvgPosition'].min()
 # Filter to get the titles and artists with the minimum average position
 lowest_avg_position = avg_position[avg_position['AvgPosition'] == min_avg_position].reset_index(drop=True)
 
-# Display the title(s) and artist(s) with the lowest average position as metrics in col1
-for i in range(len(lowest_avg_position)):
-    title, artist = lowest_avg_position.iloc[i]['Title'], lowest_avg_position.iloc[i]['Artist']
-    with col1:
-        st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}", help='Averages all positions across any new AU playlist additions')
+# Collect all artist-title pairs into a list
+artist_title_pairs = [f"{row['Artist']} - '{row['Title']}'" for _, row in lowest_avg_position.iterrows()]
 
+# Sort the list alphabetically
+artist_title_pairs.sort()
+
+# Prepare the HTML string without bullet points, using line breaks to separate items
+artist_title_html = "<div style='margin-top: -10px;'>" + "<br>".join(artist_title_pairs) + "</div>"
+
+# Display the metric with the label and the empty value, then the HTML list
+with col1:
+    # Display the metric with an empty value but with help text
+    st.metric(label=":grey[Highest Average Playlist Position]", value="", delta=f"Average Position: {min_avg_position}", help='Averages all positions across any new AU playlist additions.')
+    
+    # Use markdown to display the artist-title pairs underneath the metric
+    st.markdown(artist_title_html, unsafe_allow_html=True)
+    
 st.write("----")
-st.write(
-        """
-        <style>
-            .my-text {
-                font-size: 11px;
-                font-family: monospace;
-            }
-        </style>
-        <p class="my-text">Hover over chart to check playlist details</p>
-        """,
-        unsafe_allow_html=True,
-    )
 
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
+st.write(
+    """
+    <style>
+        .my-text {
+            font-size: 11px;
+            font-family: monospace;
+        }
+    </style>
+    <p class="my-text">Hover over chart to check playlist details</p>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Use latest_friday_df from earlier in the code
 top_artists_reach = latest_friday_df.groupby(['Artist', 'Title']).agg({

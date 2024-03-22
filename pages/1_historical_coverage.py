@@ -101,17 +101,26 @@ title_with_max_followers = title_followers[title_followers == max_followers].ind
 # Filter to find the artist for the top title
 most_reach_title_df = df[df['Title'].isin(title_with_max_followers)].drop_duplicates(subset=['Title', 'Artist'])
 
-# Format artist names
-if len(most_reach_title_df) > 1:
-    artist_names_reach = ", ".join(most_reach_title_df['Artist'].tolist()[:-1]) + " and " + most_reach_title_df['Artist'].tolist()[-1]
-else:
-    artist_names_reach = most_reach_title_df['Artist'].iloc[0]
+# Sort artist names alphabetically
+sorted_artists_reach = sorted(most_reach_title_df['Artist'].tolist())
 
-# Display result
+# Display the metric first
 with col2:
     label = ":grey[Highest Reach]"
-    st.metric(label=label, value=f"{artist_names_reach}", delta=f"{max_followers:,}", help='Total reach across AU playlist adds. Only based on the tracked playlists.', delta_color='normal')
+    st.metric(label=label, value="", delta=f"{round(max_followers):,}", help='Total reach across AU playlist adds. Only based on the tracked playlists.', delta_color='normal')
 
+# Prepare the HTML string for artist names with gap reduction, if there are multiple artists
+if len(sorted_artists_reach) > 1:
+    gap_reduction_html = "<div style='margin-top: -14px;'></div>"
+    artist_names_html_reach = gap_reduction_html + "<br>".join(f"<span style='font-size: 95%; line-height: 1;'>{artist}</span>" for artist in sorted_artists_reach)
+else:
+    gap_reduction_html = "<div style='margin-top: -16px;'></div>"
+    artist_names_html_reach = gap_reduction_html + f"<span style='font-size: 95%; line-height: 1;'>{sorted_artists_reach[0]}</span>"
+
+# Use markdown to display artist names with reduced line spacing and smaller text
+col2.markdown(artist_names_html_reach, unsafe_allow_html=True)
+
+st.write("")
 
 #######################
 # MOST ADDED METRIC
@@ -129,41 +138,63 @@ most_added_titles = title_counts[title_counts == max_adds].index.tolist()
 # Filter the original DataFrame to get the artist(s) for the most added title(s)
 most_added_artists_df = df[df['Title'].isin(most_added_titles)].drop_duplicates(subset=['Title', 'Artist'])
 
-# Format the artist names
-if len(most_added_artists_df) > 1:
-    artist_names = " | ".join(most_added_artists_df['Artist'].tolist()[:-1]) + " | " + most_added_artists_df['Artist'].tolist()[-1]
-else:
-    artist_names = most_added_artists_df['Artist'].iloc[0]
+# Sort artist names alphabetically
+sorted_artists = sorted(most_added_artists_df['Artist'].tolist())
 
-# Display the result
+# Prepare the HTML string for artist names, with adjustments if there are multiple artists
+if len(sorted_artists) > 1:
+    # Join artist names with HTML line breaks and wrap in a span for styling, after sorting them alphabetically
+    # Additionally, attempt to reduce the gap with a styled HTML block
+    gap_reduction_html = "<div style='margin-top: -14px;'></div>"
+    artist_names_html = gap_reduction_html + "<br>".join(f"<span style='font-size: 95%; line-height: 1;'>{artist}</span>" for artist in sorted_artists)
+else:
+    # For a single artist, adjust for gap and use the name without additional HTML
+    gap_reduction_html = "<div style='margin-top: -16px;'></div>"
+    artist_names_html = gap_reduction_html + f"<span style='font-size: 95%; line-height: 1;'>{sorted_artists[0]}</span>"
+
+# Display the metric
 with col2:
     label = ":grey[Most Added]"
-    st.metric(label=label, value=f"{artist_names}", delta=f"Added to {max_adds} playlists")
+    st.metric(label=label, value="", delta=f"Added to {max_adds} playlists")
 
+    # Use markdown to display artist names with reduced line spacing and smaller text
+    st.markdown(artist_names_html, unsafe_allow_html=True)
 
+    st.write("")
 
+# ####################################
+# # HIGHEST AVERAGE PLAYLIST POSITION 
+# ####################################
 
-
-####################################
-# HIGHEST AVERAGE PLAYLIST POSITION 
-####################################
-
-# Calculate the average position by grouping by 'Title' and 'Artist'
-avg_position = df.groupby(['Title', 'Artist'])['Position'].mean()
-
-# Find the index (Title, Artist) of the minimum average position
-best_avg_playlist_position_by_artist = avg_position.idxmin()
-
-# Extract just the 'Artist' from the index
-best_artist = best_avg_playlist_position_by_artist[1]  # Access the second element for 'Artist'
+# Group by 'Artist' and find the average 'Position'
+avg_position_per_artist = df.groupby('Artist')['Position'].mean().reset_index(name='AvgPosition')
 
 # Find the minimum average position
-best_avg = avg_position.min()
+min_avg_position = avg_position_per_artist['AvgPosition'].min()
 
+# Filter to get the artist(s) with the minimum average position
+artists_with_lowest_avg_position = avg_position_per_artist[avg_position_per_artist['AvgPosition'] == min_avg_position]
+
+# Prepare the HTML string for artist names with adjustments if there are multiple artists
+if len(artists_with_lowest_avg_position) > 1:
+    # Sort artist names alphabetically
+    sorted_artists = sorted(artists_with_lowest_avg_position['Artist'].tolist())
+    gap_reduction_html = "<div style='margin-top: -14px;'></div>"
+    artist_names_html = gap_reduction_html + "<br>".join(f"<span style='font-size: 95%; line-height: 1;'>{artist}</span>" for artist in sorted_artists)
+else:
+    # For a single artist, adjust for gap and use the name without additional HTML
+    gap_reduction_html = "<div style='margin-top: -16px;'></div>"
+    artist_names_html = gap_reduction_html + f"<span style='font-size: 95%; line-height: 1;'>{artists_with_lowest_avg_position['Artist'].iloc[0]}</span>"
+
+# Display the metric
 with col2:
     label = ":grey[Highest Average Playlist Position]"
-    st.metric(label=label, value=f"{best_artist}", delta=f"{best_avg:.0f}", delta_color='normal', help='Averages all positions across any new AU playlist additions')
-    
+    st.metric(label=label, value="", delta=f"Average Position: {min_avg_position}")
+
+    # Use markdown to display artist names with reduced line spacing and smaller text
+    col2.markdown(artist_names_html, unsafe_allow_html=True)
+
+
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
@@ -206,33 +237,6 @@ fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}
 
 # Display the exact number of followers on top of each bar and adjust other aesthetics
 fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
-
-# fig.update_layout(
-#     xaxis_title="",
-#     yaxis_title="Total  Reach",
-#     yaxis=dict(type='linear'),
-#     xaxis_tickangle=-30,
-#     # plot_bgcolor='rgba(0,0,0)',
-#     # paper_bgcolor='rgb(0,0,0)',  # black paper background for the entire figure
-#     margin=dict(t=10),
-#     title=dict(
-#         text='Top 5 Highest Reach',
-#         font=dict(
-#             family="Aria, sans-serif",
-#             size=14,
-#             color="#FAFAFA"
-#         ),
-#         y=1,  # Adjust the title's position on the y-axis
-#         x=0.6,  # Center the title on the x-axis
-#         xanchor='center',  # Use the center of the title for x positioning
-#         yanchor='top'  # Anchor the title to the top of the layout
-        
-# ),
-#     coloraxis_showscale=False  # Optionally hide color scale legend
-    
-#     )
-
-# Updated "Top 5 Highest Reach" title to ensure positioning doesn't change 
 
 fig.update_layout(
     xaxis_title="",
@@ -297,10 +301,13 @@ filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Art
 
 # Continue with sorting and displaying the data as before
 ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
-ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
+
+# Convert 'Followers' to integers to remove decimal points, then format as strings with commas
+ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].fillna(0).astype(int).apply(lambda x: f"{x:,}")
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
+
 
 
 
