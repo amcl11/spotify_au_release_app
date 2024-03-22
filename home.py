@@ -107,7 +107,6 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-
 # Remove download and other buttons from all Dataframes
 st.markdown(
                 """
@@ -120,31 +119,6 @@ st.markdown(
                 unsafe_allow_html=True
             )
 
-#######################
-# HIGHEST REACH METRIC 
-#######################
-
-# # Group by 'Title' and 'Artist', then sum the 'Followers' column
-# highest_reach = latest_friday_df.groupby(['Title', 'Artist'])['Followers'].sum().reset_index(name='Reach')
-
-# # Find the maximum reach
-# max_reach = highest_reach['Reach'].max()
-
-# # Filter to get the titles with the maximum reach
-# highest_reach_max = highest_reach[highest_reach['Reach'] == max_reach].reset_index(drop=True)
-
-# # Display the 'Highest Reach' title(s) and artist(s) as metrics in col1
-# for i in range(len(highest_reach_max)):
-#     title, artist, reach = highest_reach_max.iloc[i]['Title'], highest_reach_max.iloc[i]['Artist'], highest_reach_max.iloc[i]['Reach']
-#     with col1:
-#         st.metric(
-#     label=":gray[Highest Reach]",
-#     value=f"{artist} - '{title}'",
-#     delta="{:,}".format(int(reach)),  # Format 'reach' with commas and no decimal places
-#     help='Total reach across AU playlist adds. Only based on the tracked playlists.'
-# )
-
-######testing####
 #######################
 # HIGHEST REACH METRIC 
 #######################
@@ -179,34 +153,6 @@ with col1:
 
 
 #######################
-# MOST ADDED METRIC - old
-#######################
-
-# # Use latest_friday_df from earlier in the code
-# # Find the titles with the most entries
-# most_added = latest_friday_df.groupby(['Title', 'Artist']).size().reset_index(name='Count')
-# max_count = most_added['Count'].max()
-# most_added_max = most_added[most_added['Count'] == max_count].reset_index(drop=True)
-
-# # Use a variable to track if the label has been displayed
-# label_displayed = False
-
-# for i, (index, row) in enumerate(most_added_max.iterrows()):
-#     title, artist = row['Title'], row['Artist']
-#     # For the first item, display the label
-#     if i == 0:
-#         label = ":grey[Most Added]"
-#     else:
-#         # For subsequent items, check if the title is different.
-#         # If it is, update the label to be displayed; if not, keep the label empty
-#         label = "" if title == most_added_max.iloc[i-1]['Title'] else":grey[Most Added]"
-
-#     with col1:
-#         st.metric(label=label, value=f"{artist} - '{title}'", delta=f"Added to {max_count} playlists")
-        
-
-####testing####
-#######################
 # MOST ADDED METRIC
 #######################
 
@@ -235,44 +181,6 @@ with col1:
     st.write("")
 
 
-
-
-
-####################################
-# HIGHEST AVERAGE PLAYLIST POSITION 
-####################################
-
-# # Use latest_friday_df from earlier in the code
-# # Group by 'Title' and 'Artist', then find the average 'Position'
-# avg_position = latest_friday_df.groupby(['Title', 'Artist'])['Position'].mean().reset_index(name='AvgPosition')
-
-# # Find the minimum average position
-# min_avg_position = avg_position['AvgPosition'].min()
-
-# # Filter to get the titles and artists with the minimum average position
-# lowest_avg_position = avg_position[avg_position['AvgPosition'] == min_avg_position].reset_index(drop=True)
-
-# # Display the title(s) and artist(s) with the lowest average position as metrics in col1
-# for i in range(len(lowest_avg_position)):
-#     title, artist = lowest_avg_position.iloc[i]['Title'], lowest_avg_position.iloc[i]['Artist']
-#     with col1:
-#         st.metric(label=":gray[Highest Average Playlist Position]", value=f"{artist} - '{title}'", delta=f"Average Playlist Position: {round(min_avg_position)}", help='Averages all positions across any new AU playlist additions')
-
-# st.write("----")
-# st.write(
-#         """
-#         <style>
-#             .my-text {
-#                 font-size: 11px;
-#                 font-family: monospace;
-#             }
-#         </style>
-#         <p class="my-text">Hover over chart to check playlist details</p>
-#         """,
-#         unsafe_allow_html=True,
-#     )
-
-#####testing#####
 ####################################
 # HIGHEST AVERAGE PLAYLIST POSITION 
 ####################################
@@ -306,9 +214,11 @@ with col1:
     
 st.write("----")
 
+
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
+
 st.write(
     """
     <style>
@@ -361,31 +271,6 @@ fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}
 # Display the exact number of followers on top of each bar and adjust other aesthetics
 fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
 
-# fig.update_layout(
-#     xaxis_title="",
-#     yaxis_title="Total  Reach",
-#     yaxis=dict(type='linear'),
-#     xaxis_tickangle=-30,
-#     # plot_bgcolor='rgba(0,0,0)',
-#     # paper_bgcolor='rgb(0,0,0)',  # black paper background for the entire figure
-#     margin=dict(t=10),
-#     title=dict(
-#         text='Top 5 Highest Reach',
-#         font=dict(
-#             family="Aria, sans-serif",
-#             size=14,
-#             color="#FAFAFA"
-#         ),
-#         y=0.95,  # Adjust the title's position on the y-axis
-#         x=0.65,  # Center the title on the x-axis
-#         xanchor='center',  # Use the center of the title for x positioning
-#         yanchor='top'  # Anchor the title to the top of the layout
-        
-# ),
-#     coloraxis_showscale=False  # Optionally hide color scale legend
-    
-#     )
-
 fig.update_layout(
     xaxis_title="",
     yaxis_title="Total Reach",
@@ -423,6 +308,7 @@ st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 ########################
 # SEARCH ADDS BY SONG
 ########################
+
 st.subheader('Search Adds By Song:')
 
 # Combine Artist & Title for the first dropdown box: 
@@ -459,6 +345,7 @@ st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_con
 ###########################
 # SEARCH ADDS BY PLAYLIST
 ###########################
+
 st.write("")
 st.subheader('Search Adds By Playlist:')
 
@@ -473,8 +360,6 @@ filtered_playlist_df = latest_friday_df[latest_friday_df['Playlist'] == selected
 # Check if 'Artist' and 'Title' columns only contain None values
 if filtered_playlist_df[['Artist', 'Title']].isnull().all(axis=None):
     st.markdown(f"<span style='color: #FAFAFA;'>No New Releases added to <span style='color: salmon;'>**{selected_playlist}**</span> that were also added to NMF AU & NZ</span>", unsafe_allow_html=True)
-
-
 
 else:
     sorted_df = filtered_playlist_df.sort_values(by='Position', ascending=True)
@@ -491,9 +376,6 @@ else:
         },
         hide_index=True
     )
-
-# # Display all songs in the selected playlist
-# st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=False)
 
 #################################################
 # Cover Artists DataFrame 
@@ -515,33 +397,6 @@ st.dataframe(final_cover_artist_df, use_container_width=False, hide_index=True)
 
 st.write("") # padding 
 st.write("*Cover artist may update before cover images*")
-
-#############################
-# Playlist packshots
-#############################
-
-# col1, col2 = st.columns(2)  # Use two columns instead of three
-
-# # Update the list of columns for easier access
-# cols = [col1, col2]
-
-# # Total number of playlists remains the same
-# total_playlists = len(new_cover_artist_df)
-
-# # Iterate over DataFrame rows 
-# for index, row in new_cover_artist_df.iterrows():
-#     playlist_name = row['Playlist']
-#     artist_name = row['Cover_Artist']
-#     image_url = row['Image_URL']
-    
-#     # For two columns, adjust the logic accordingly
-#     if index == total_playlists - 1 and total_playlists % 2 != 0:
-#         col_index = 1  # Use col2 for the last image if odd number of playlists
-#     else:
-#         col_index = index % 2  # Use modulo 2 for two columns
-    
-#     # Display the image in the selected column with the artist name as the caption
-#     cols[col_index].image(image_url, caption=f"Cover Artist: {artist_name}", width=300)
 
 #################################################################################
 # New Playlist packshots code - to centre the final image if the number is odd. 

@@ -120,7 +120,7 @@ else:
 # Use markdown to display artist names with reduced line spacing and smaller text
 col2.markdown(artist_names_html_reach, unsafe_allow_html=True)
 
-st.write("")
+col2.write("")
 
 #######################
 # MOST ADDED METRIC
@@ -160,7 +160,8 @@ with col2:
     # Use markdown to display artist names with reduced line spacing and smaller text
     st.markdown(artist_names_html, unsafe_allow_html=True)
 
-    st.write("")
+    col2.write("")
+    col2.write("")
 
 # ####################################
 # # HIGHEST AVERAGE PLAYLIST POSITION 
@@ -194,10 +195,28 @@ with col2:
     # Use markdown to display artist names with reduced line spacing and smaller text
     col2.markdown(artist_names_html, unsafe_allow_html=True)
 
-
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
 ########################################################## 
+
+st.write("---")
+st.write(
+    """
+    <style>
+        .my-text {
+            font-size: 11px;
+            font-family: monospace;
+        }
+    </style>
+    <p class="my-text">Hover over chart to check playlist details</p>
+    """,
+    unsafe_allow_html=True,
+)
+# Use latest_friday_df from earlier in the code
+top_artists_reach = df.groupby(['Artist', 'Title']).agg({
+    'Followers': 'sum',
+    'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
+})
 
 # # Display the data for the most recent date
 top_artists_reach = df.groupby(['Artist', 'Title']).agg({
@@ -308,9 +327,6 @@ ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].fillna(0).as
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
 
-
-
-
 ###########################
 # SEARCH ADDS BY PLAYLIST
 ###########################
@@ -345,7 +361,6 @@ else:
         },
         hide_index=True
     )
-
 
 # # Display all songs in the selected playlist
 # st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)

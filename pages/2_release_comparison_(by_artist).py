@@ -32,9 +32,9 @@ def fetch_data_for_selected_artist(artist_name):
     return artist_data_df
 
 st.subheader('Release Comparison (By Artist):')
-st.write('*Data available from 23rd Feb 2024 onwards*')
+st.write('Data available from 23rd Feb 2024 onwards')
 st.markdown(
-    '<p style="font-size: 14px;">*This site only tracks releases that were added to NMF AU & NZ</p>', 
+    '<p style="font-size: 14px;">This site only tracks releases that were added to NMF AU & NZ</p>', 
     unsafe_allow_html=True
 )
 st.write('--------------')
@@ -48,6 +48,16 @@ selected_artist = st.selectbox('Select Artist:', artists)
 if selected_artist:
     artist_data = fetch_data_for_selected_artist(selected_artist)
 
+# Convert 'Date' from string to datetime format
+artist_data['Date'] = pd.to_datetime(artist_data['Date'])
+
+# Use the existing 'add_ordinal' function to format the date
+def add_ordinal(day):
+    return str(day) + ("th" if 4 <= day % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th"))
+
+# Format 'Date' as "22nd March, 2024"
+artist_data['Formatted_Date'] = artist_data['Date'].dt.day.apply(add_ordinal) + " " + artist_data['Date'].dt.strftime('%B, %Y')
+
 # Get the total followers for each title
 total_followers_per_title = artist_data.groupby('Title')['Followers'].sum().reset_index()
     
@@ -59,49 +69,44 @@ titles_of_interest = artist_data['Title'].unique()
 # Use this order for the x-axis order in the plot
 artist_data_filtered = artist_data[artist_data['Title'].isin(titles_of_interest)]
 
-# For viewing DF if needed
-# st.dataframe(artist_data_filtered) 
-
-total_playlist_adds = artist_data_filtered.groupby('Title')['Playlist'].nunique()
-
 # Stacked bar chart for Reach comparision
 fig = px.bar(artist_data_filtered, 
     x='Title', 
     y='Followers', 
     color='Playlist', 
     text='Playlist', 
-    custom_data=['Position'],  # Include 'Position' in custom data for access in hovertemplate
+    custom_data=['Position', 'Formatted_Date'],  # Add 'Formatted_Date' to custom data
     category_orders={'Title': sorted_titles.tolist()})
-    
+
 # Update the layout for a better visual representation
 fig.update_layout(
     barmode='stack',
     title={
         'text': "Total Reach on Release (Fri-Wed)",
         'y':0.9,
-        'x':0.5,  # Centers the title
-        'xanchor': 'center',  # Ensures the center of the title is at x=0.5
+        'x':0.5,
+        'xanchor': 'center',
         'yanchor': 'top'
     },
     xaxis_title="",
     yaxis_title="",
     legend_title="Playlists",
-    height=400,  # Specify the desired height of the figure in pixels
-    yaxis=dict(  # Adjust the y-axis ticks
-        # tickmode='linear',  # Set the tick mode to 'linear' to place ticks at regular intervals
-        tick0=0,  # Set the starting tick
-        dtick=500000  # Set the interval between ticks, adjust this value as needed
+    height=400,
+    yaxis=dict(
+        tick0=0,
+        dtick=500000
     )
-    )
-    
+)
+
 # Customize hover data
-# Customize hover data with 'Position' included
 fig.update_traces(
     textposition='inside',
-    hovertemplate="<b>Playlist:</b> %{text}<br>" + 
-                  "<b>Playlist Reach:</b> %{y:,.0f}<br>" + 
-                  "<b>Position:</b> %{customdata[0]}<extra></extra>"  # %{customdata[0]} accesses the first item in custom data
+    hovertemplate="<b>Release Date:</b> %{customdata[1]}<br>" +  # Access 'Formatted_Date' from custom data
+                  "<b>Playlist:</b> %{text}<br>" +
+                  "<b>Playlist Reach:</b> %{y:,.0f}<br>" +
+                  "<b>Position:</b> %{customdata[0]}<extra></extra>"
 )
+
 st.write(
         """
         <style>
@@ -110,12 +115,9 @@ st.write(
                 font-family: monospace;
             }
         </style>
-        <p class="my-text">Hover over chart to check playlist position on release week:</p>
+        <p class="my-text">Hover over chart for additional info:</p>
         """,
         unsafe_allow_html=True,
     )
-
 # Show the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
- 
