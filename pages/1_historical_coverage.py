@@ -310,7 +310,7 @@ choices = filtered_df_for_artist_title['Artist_Title'].unique()
 sorted_choices = sorted(choices, key=lambda x: x.lower())
 
 # Dropdown for user to select an artist and title
-selected_artist_title = st.selectbox('Select New Release:', sorted_choices)
+selected_artist_title = st.selectbox('Select Release:', sorted_choices)
 
 # Add 'Artist_Title' to the original dataframe for filtering based on the dropdown selection
 df['Artist_Title'] = df.apply(lambda row: f"{row['Artist']} - {row['Title']}" if pd.notnull(row['Artist']) and pd.notnull(row['Title']) else None, axis=1)
