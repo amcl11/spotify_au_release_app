@@ -17,6 +17,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.write("")
-st.write("")
-st.link_button(label='Github', url='https://github.com/amcl11/spotify_au_release_app')
