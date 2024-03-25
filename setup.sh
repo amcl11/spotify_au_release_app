@@ -16,6 +16,6 @@ port = $PORT\n\
 backgroundColor=\"#0E1117\"\n\
 primaryColor=\"#1db954\"\n\
 textColor=\"#FAFAFA\"\n\
-secondaryBackgroundColor=\"#162736\"\n\
+secondaryBackgroundColor=\"#12212e\"\n\
 font=\"sans serif\"\n\
 " > ~/.streamlit/config.toml

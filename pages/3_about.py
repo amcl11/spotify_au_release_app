@@ -12,7 +12,7 @@ This site streamlines Friday morning playlist checking for those interested in N
     
 The process involves retrieving all songs that have been added to <span style='color: salmon;'>New Music Friday AU & NZ</span>. These songs are then reviewed to check whether they have also been added to key Australian editorial playlists. 
  
-This means New Releases that did not get added to NMF AU & NZ will not show up on this site - focusing on the releases that Spotify has chosen to feature in NMF.
+This means New Releases that did not get added to NMF AU & NZ (eg. additional album tracks, previous releases that have picked up new playlists additions etc) will not show up on this site - focusing on the brand new releases that Spotify has chosen to feature in NMF AU/NZ.
     
 *Historical coverage is a snapshot of playlist adds between Friday (release) → Wednesday 9.00am AEST. 
     
@@ -30,6 +30,7 @@ st.write("""
 - Search `adds by playlist`.
 - See which artists are featured on `playlist covers`.
 - `Release comparison (by artist)` 
+- `Top Performers` - Comparing highest reach releases across the available weeks (23rd Feb onwards).
 """)
 st.write("")
 # List of playlists tracked
@@ -107,6 +108,15 @@ if submit_button:
         st.success("Submission received.")
     else:
         st.error("Please submit a valid Spotify playlist link.")
+        
+
+st.write("-----")
+
+# st.subheader("Data Freshness:")
+
+# st.write("The schedule below outlines the current data pull frequency from Spotify's API.")
+
+
 
 
 
