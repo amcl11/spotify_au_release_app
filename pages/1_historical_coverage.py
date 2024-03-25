@@ -199,11 +199,101 @@ with col2:
 ########################################################## 
 
 st.write("---")
+# st.write(
+#     """
+#     <style>
+#         .my-text {
+#             font-size: 12px;
+#             font-family: monospace;
+#         }
+#     </style>
+#     <p class="my-text">Hover over chart to check playlist details</p>
+#     """,
+#     unsafe_allow_html=True,
+# )
+# # Use latest_friday_df from earlier in the code
+# top_artists_reach = df.groupby(['Artist', 'Title']).agg({
+#     'Followers': 'sum',
+#     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
+# })
+
+# # # Display the data for the most recent date
+# top_artists_reach = df.groupby(['Artist', 'Title']).agg({
+#     'Followers': 'sum',
+#     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
+# })
+
+# # Sort the DataFrame based on 'Followers' while maintaining the whole DataFrame
+# sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
+
+# # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
+# results_with_playlist = sorted_top_artists_reach.head(5).copy()
+
+# # Calculate the 'Playlist_str' values using an intermediate step
+# playlist_str_series = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
+
+# # Assign the calculated series to the DataFrame explicitly
+# results_with_playlist['Playlist_str'] = playlist_str_series
+
+# # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
+# results_with_playlist = results_with_playlist.reset_index()
+
+# # Create colour scale
+# color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
+
+# # Create bar chart with Plotly Express
+# fig = px.bar(results_with_playlist, x='Artist', y='Followers',
+#              text='Followers',
+#              hover_data=['Title', 'Playlist_str'],  # Add 'Playlist_str' to hover data
+#              color='Followers',  # Assign color based on 'Followers' values
+#              color_continuous_scale=color_scale  # Use the custom color scale
+#              )
+
+# # Custom hover template to include Playlist information
+# # Update hovertemplate to include 'Title'
+# fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}<br>Playlists: %{customdata[1]}')
+
+# # Display the exact number of followers on top of each bar and adjust other aesthetics
+# fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
+
+# fig.update_layout(
+#     xaxis_title="",
+#     yaxis_title="Total Reach",
+#     yaxis=dict(type='linear'),
+#     xaxis_tickangle=-45,
+#     plot_bgcolor='rgba(0,0,0,0)',  # Set background color to transparent
+#     paper_bgcolor='#0E1117',  # Set the overall figure background color
+#     margin=dict(t=60, l=40, r=40, b=40),  # Adjust margin to make sure title fits
+#     title=dict(
+#         text='Top 5 Highest Reach',
+#         font=dict(
+#             family="Arial, sans-serif",
+#             size=18,
+#             color="white"
+#         ),
+#         y=0.9,  # Position title within the top margin of the plotting area
+#         x=0.5,  # Center the title on the x-axis
+#         xanchor='center',
+#         yanchor='top'
+#     ),
+#     coloraxis_showscale=False
+# )
+
+# fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
+# fig.update_layout(
+#     uniformtext_minsize=8,
+#     uniformtext_mode='hide',
+#     showlegend=False  # Optionally hide the legend if not needed
+# )
+
+# # Display the figure in Streamlit
+# st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
 st.write(
     """
     <style>
         .my-text {
-            font-size: 11px;
+            font-size: 12px;
             font-family: monospace;
         }
     </style>
@@ -211,13 +301,8 @@ st.write(
     """,
     unsafe_allow_html=True,
 )
-# Use latest_friday_df from earlier in the code
-top_artists_reach = df.groupby(['Artist', 'Title']).agg({
-    'Followers': 'sum',
-    'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
-})
 
-# # Display the data for the most recent date
+# Use latest_friday_df from earlier in the code
 top_artists_reach = df.groupby(['Artist', 'Title']).agg({
     'Followers': 'sum',
     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
@@ -229,63 +314,59 @@ sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascendi
 # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
 results_with_playlist = sorted_top_artists_reach.head(5).copy()
 
-# Calculate the 'Playlist_str' values using an intermediate step
-playlist_str_series = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
-
-# Assign the calculated series to the DataFrame explicitly
-results_with_playlist['Playlist_str'] = playlist_str_series
+# Join the playlist names with '<br>' to create a single string with line breaks
+results_with_playlist['Playlists_str'] = results_with_playlist['Playlist'].apply(lambda x: '<br>'.join(x))
 
 # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()
 
-# Create colour scale
+# Calculate maximum value of 'total_followers' and add a larger buffer
+max_value = results_with_playlist['Followers'].max()
+buffer = max_value * 0.2  # adjust this buffer percentage as needed
+
+# Create a color scale
 color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
 
-# Create bar chart with Plotly Express
+# Create a bar chart using Plotly Express
 fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              text='Followers',
-             hover_data=['Title', 'Playlist_str'],  # Add 'Playlist_str' to hover data
+             hover_data=['Title', 'Playlists_str'],  # Add 'Playlist_str' to hover data
              color='Followers',  # Assign color based on 'Followers' values
-             color_continuous_scale=color_scale  # Use the custom color scale
+             color_continuous_scale=color_scale  # Use custom color scale
              )
 
-# Custom hover template to include Playlist information
-# Update hovertemplate to include 'Title'
-fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}<br>Playlists: %{customdata[1]}')
+# Custom hover template
+fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>%{customdata[1]}',
+                  textposition='outside',
+                  texttemplate='%{text:.3s}'
+                  )
 
-# Display the exact number of followers on top of each bar and adjust other aesthetics
-fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
-
+# Layout adjustments
 fig.update_layout(
-    xaxis_title="",
-    yaxis_title="Total Reach",
-    yaxis=dict(type='linear'),
-    xaxis_tickangle=-45,
+    yaxis=dict(
+        title='Total Playlist Reach',
+        range=[0, max_value + buffer],  # Extend the range beyond the highest bar
+        automargin=True,  # Let Plotly adjust the margin automatically
+    ),
+    xaxis=dict(
+        tickangle=-20,
+        title = '',
+        automargin=True,  # Let Plotly adjust the margin automatically
+    ),
     plot_bgcolor='rgba(0,0,0,0)',  # Set background color to transparent
     paper_bgcolor='#0E1117',  # Set the overall figure background color
-    margin=dict(t=60, l=40, r=40, b=40),  # Adjust margin to make sure title fits
+    margin=dict(t=80, l=40, r=40, b=40),  # Adjust margin to make sure title fits
     title=dict(
         text='Top 5 Highest Reach',
-        font=dict(
-            family="Arial, sans-serif",
-            size=18,
-            color="white"
-        ),
+        font=dict(family="Arial, sans-serif", size=18, color="white"),
         y=0.9,  # Position title within the top margin of the plotting area
         x=0.5,  # Center the title on the x-axis
         xanchor='center',
         yanchor='top'
     ),
+    showlegend=False,
     coloraxis_showscale=False
 )
-
-fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
-fig.update_layout(
-    uniformtext_minsize=8,
-    uniformtext_mode='hide',
-    showlegend=False  # Optionally hide the legend if not needed
-)
-
 # Display the figure in Streamlit
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
@@ -361,13 +442,13 @@ else:
         hide_index=True
     )
 
-######### BUILDING NEW GRAPH FEATURE - TOP PERFORMERS ######
+######### NEW GRAPH FEATURE - TOP PERFORMERS ######
 st.write("-----")
 st.subheader("Top Performers:")
 st.write('Comparing the weekly top performing release (by reach) across the available weeks (23rd Feb onwards).')
 
 # Define the caching function
-@st.cache_data(ttl=259200, show_spinner="Fetching Top Performers...") #cache for 3 days 
+@st.cache_data(ttl=3500, show_spinner="Fetching Top Performers...") #cache for 3 days 
 def get_data(sql, _engine):
     return pd.read_sql(sql, _engine)
 
@@ -437,17 +518,13 @@ fig = px.bar(df_sorted, x='Artist/Title', y='total_followers', text='formatted_f
              orientation='v',
              hover_data={'total_followers': ':,', 'formatted_date': True})  # Use formatted date
 
-# Customize hover template to show 'Release Date'
-fig.update_traces(hovertemplate='Release Date: %{customdata[0]}<extra></extra>')
-
-# Move the text above the bars
-fig.update_traces(textposition='outside')
+# Customize hover template to show 'Release Date' and move text above the bars
+fig.update_traces(hovertemplate='Release Date: %{customdata[0]}<extra></extra>',
+                  textposition='outside')
 
 # Calculate maximum value of 'total_followers' and add a buffer
 max_value = df_sorted['total_followers'].max()  
 buffer = max_value * 0.25  #buffer
-
-
 
 fig.update_layout(
     yaxis=dict(
