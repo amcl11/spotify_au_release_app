@@ -28,7 +28,6 @@ def fetch_unique_dates():
     # Convert dates to a more readable string format for display
     return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
 
-
 # Function to load database data based on selected date
 # @st.cache_data - this was hingering updated triple j adds on Monday 
 @st.cache_data(ttl=3500, show_spinner='Loading data...')
@@ -362,8 +361,120 @@ else:
         hide_index=True
     )
 
-# # Display all songs in the selected playlist
-# st.dataframe(filtered_playlist_df[['Artist', 'Title', 'Position']].sort_values(by='Position', ascending=True), hide_index=True, use_container_width=True)
+######### BUILDING NEW GRAPH FEATURE - TOP PERFORMERS ######
+st.write("-----")
+st.subheader("Top Performers:")
+st.write('Comparing the weekly top performing release (by reach) across the available weeks (23rd Feb onwards).')
+
+# Define the caching function
+@st.cache_data(ttl=259200, show_spinner="Fetching Top Performers...") #cache for 3 days 
+def get_data(sql, _engine):
+    return pd.read_sql(sql, _engine)
+
+# SQL query
+sql_query = """
+WITH TotalFollowers AS (
+  SELECT    
+    "Date",
+    "Artist",
+    "Title",
+    SUM("Followers") AS total_followers
+  FROM nmf_spotify_coverage
+  WHERE "Artist" IS NOT NULL AND "Title" IS NOT NULL AND "Followers" IS NOT NULL
+  GROUP BY "Date", "Artist", "Title"
+),
+RankedArtists AS (
+  SELECT
+    "Date",
+    "Artist",
+    "Title",
+    total_followers,
+    RANK() OVER (PARTITION BY "Date" ORDER BY total_followers DESC) as rank
+  FROM TotalFollowers
+)
+SELECT "Date", "Artist", "Title", total_followers
+FROM RankedArtists
+WHERE rank = 1
+ORDER BY "Date";
+
+"""
+
+df = get_data(sql_query, engine)
+
+df['Artist/Title'] = df['Artist'] + " - '" + df['Title'] + "'"
+df['Date'] = pd.to_datetime(df['Date'])
+df['formatted_followers'] = (df['total_followers'] / 1e6).map("{:.2f}m".format)
+
+# Sort dataframe in descending order by 'total_followers'
+df_sorted = df.sort_values(by='total_followers', ascending=False)
+
+# Function to apply custom date formatting with suffix for the day
+def custom_date_format(date):
+    day = date.day
+    day_with_suffix = f"{day}{suffix(day)}"
+    formatted_date = date.strftime(f"{day_with_suffix} %B %Y")
+    return formatted_date
+
+def suffix(d):
+    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
+# Apply the custom date formatting function to your date column
+df_sorted['formatted_date'] = df_sorted['Date'].apply(custom_date_format)
+
+# Define a custom color scale with more subtle changes
+# The numbers represent the relative positions of each color from 0 (start) to 1 (end)
+custom_color_scale = [
+    (0, 'rgb(230, 240, 255)'),  # Lighter blue
+    (0.5, 'rgb(180, 210, 255)'),  # Medium blue
+    (1, 'rgb(100, 150, 240)'),  # Darker blue
+]
+
+# Plotting with 'Artist/Title' on x-axis and total followers on y-axis
+fig = px.bar(df_sorted, x='Artist/Title', y='total_followers', text='formatted_followers',
+             title='',
+             color='total_followers',
+             color_continuous_scale=custom_color_scale,  # Use the custom color scale
+             orientation='v',
+             hover_data={'total_followers': ':,', 'formatted_date': True})  # Use formatted date
+
+# Customize hover template to show 'Release Date'
+fig.update_traces(hovertemplate='Release Date: %{customdata[0]}<extra></extra>')
+
+# Move the text above the bars
+fig.update_traces(textposition='outside')
+
+# Calculate maximum value of 'total_followers' and add a buffer
+max_value = df_sorted['total_followers'].max()  
+buffer = max_value * 0.25  #buffer
+
+
+
+fig.update_layout(
+    yaxis=dict(
+        title='Total Playlist Reach',
+        # Define the range with a narrower lower bound or a higher upper bound
+        range=[-max_value * 0.05, max_value * 1.10],  # The negative lower bound can give more "room" at the bottom
+    ),
+    xaxis_tickangle=30,
+    xaxis_title='',
+    showlegend=False,
+    coloraxis_showscale=False,  # This hides the color scale bar
+)
+
+# # Update the layout with the new y-axis range
+# fig.update_layout(
+#     yaxis=dict(
+#         title='Total Playlist Reach',
+#         range=[0, max_value + buffer]  # Set the range from 0 to max value plus buffer
+#     ),
+#     xaxis_tickangle=35,
+#     xaxis_title='',
+#     showlegend=False,
+#     coloraxis_showscale=False  # This hides the color scale bar
+# )
+
+# Display the plot, ensuring it takes up the full container width / removes display bar 
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 
 
