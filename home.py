@@ -119,8 +119,15 @@ st.markdown(
                 unsafe_allow_html=True
             )
 
-todays_cover_image = latest_friday_df['Image_URL'][0]
-col2.image(todays_cover_image)
+# Filter the DataFrame to get rows matching the NMF playlist
+filtered_df = latest_friday_df[latest_friday_df['Playlist'] == "New Music Friday AU & NZ"]
+
+# Ensure the filtered DataFrame is not empty before extracting the Image_URL
+if not filtered_df.empty:
+    todays_cover_image = filtered_df['Image_URL'].iloc[0]  
+    col2.image(todays_cover_image)
+else:
+    col2.write("Issues displaying current NMF image.")
 
 #######################
 # HIGHEST REACH METRIC 
@@ -540,7 +547,7 @@ st.write('- - - - - -')
 
 
 ################################
-# UPDATED ADDS BY PLAYLIST GRAPH
+# ADDS BY PLAYLIST GRAPH
 ################################
 
 # # Calculate the number of adds per playlist and sort for plotting
