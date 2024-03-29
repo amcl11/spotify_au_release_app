@@ -12,25 +12,6 @@ if DATABASE_URL.startswith("postgres://"):
 
 engine = create_engine(DATABASE_URL)
 
-# Function to fetch all data for artists with more than one unique title
-@st.cache_data(show_spinner="Fetching artists...")
-def fetch_artists_for_selectbox():
-    query = """
-    SELECT "Artist"
-    FROM nmf_spotify_coverage 
-    GROUP BY "Artist" 
-    HAVING COUNT(DISTINCT "Title") > 1
-    """
-    artists_df = pd.read_sql_query(query, engine)
-    return artists_df['Artist'].tolist()
-
-# Function to fetch all available data for a selected artist
-@st.cache_data(show_spinner="Loading data...")
-def fetch_data_for_selected_artist(artist_name):
-    query = 'SELECT * FROM nmf_spotify_coverage WHERE "Artist" = %s'
-    artist_data_df = pd.read_sql_query(query, engine, params=(artist_name,))
-    return artist_data_df
-
 st.subheader('Release Comparison (By Artist):')
 st.write('Data available from 23rd Feb 2024 onwards')
 st.markdown(
@@ -39,14 +20,40 @@ st.markdown(
 )
 st.write('--------------')
 
-# Populate a selectbox with artist names
-artists = fetch_artists_for_selectbox()
+def fetch_all_for_selectbox():
+    query = """
+    SELECT "Date", "Artist", "Title", "Playlist", "Position", "Followers"
+    FROM nmf_spotify_coverage 
+    """
+    df = pd.read_sql_query(query, engine)
+    return df
 
-selected_artist = st.selectbox('Select Artist:', artists)
+df = fetch_all_for_selectbox()
+
+# Split the 'Artist' column by ", " and then explode the DataFrame to normalize it
+df_normalized = df.assign(Artist=df['Artist'].str.split(', ')).explode('Artist')
+
+# group by 'Artist' and count distinct titles 
+artist_title_counts = df_normalized.groupby('Artist')['Title'].nunique()
+
+# Filter artists with more than one distinct title
+filtered_artists = artist_title_counts[artist_title_counts > 1]
+
+# Convert the index (which contains artist names) to a list for the select box options
+select_box_options = filtered_artists.index.tolist()
+
+# Sort the list of artists alphabetically, ignoring case
+select_box_options_sorted = sorted(select_box_options, key=lambda x: x.lower())
+
+
+
+# Populate a selectbox with the sorted artist names
+selected_artist = st.selectbox('Select Artist:', select_box_options_sorted)
 
 # Fetch and display data for the selected artist
 if selected_artist:
-    artist_data = fetch_data_for_selected_artist(selected_artist)
+    # Filtering the normalized dataframe for the selected artist
+    artist_data = df_normalized[df_normalized['Artist'] == selected_artist]
 
 # Convert 'Date' from string to datetime format
 artist_data['Date'] = pd.to_datetime(artist_data['Date'])
@@ -97,6 +104,8 @@ fig.update_layout(
         dtick=500000
     )
 )
+
+fig.update_xaxes(tickangle=-25)  # Angle can be adjusted as needed
 
 # Customize hover data
 fig.update_traces(
