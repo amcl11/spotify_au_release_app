@@ -19,6 +19,7 @@ def schedule():
     scheduler = BlockingScheduler(timezone="Australia/Sydney")
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=1))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=15))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=0, minute=46))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=1, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=1, minute=30))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=2, minute=0))
