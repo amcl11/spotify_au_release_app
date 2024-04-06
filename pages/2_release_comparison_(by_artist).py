@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import pandas as pd
 import plotly.express as px
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import psycopg2
 
 
@@ -20,12 +20,15 @@ st.markdown(
 )
 st.write('--------------')
 
+
 def fetch_all_for_selectbox():
-    query = """
+    query = text("""
     SELECT "Date", "Artist", "Title", "Playlist", "Position", "Followers"
     FROM nmf_spotify_coverage 
-    """
-    df = pd.read_sql_query(query, engine)
+    """)
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
     return df
 
 df = fetch_all_for_selectbox()
@@ -44,8 +47,6 @@ select_box_options = filtered_artists.index.tolist()
 
 # Sort the list of artists alphabetically, ignoring case
 select_box_options_sorted = sorted(select_box_options, key=lambda x: x.lower())
-
-
 
 # Populate a selectbox with the sorted artist names
 selected_artist = st.selectbox('Select Artist:', select_box_options_sorted)

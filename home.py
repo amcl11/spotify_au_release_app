@@ -31,6 +31,7 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 engine = create_engine(DATABASE_URL)
 
+
 ##################################
 # TITLE INFO
 ##################################
@@ -83,11 +84,15 @@ st.subheader(most_recent_friday_str)
 
 @st.cache_data(ttl=3500, show_spinner='Fetching New Releases...')
 def load_db_for_most_recent_date():
-    query = """
+    query = text("""
     SELECT * FROM nmf_spotify_coverage
     WHERE "Date" = (SELECT MAX("Date") FROM nmf_spotify_coverage)
-    """
-    latest_friday_df = pd.read_sql_query(query, engine)
+    """)
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        # Ensure columns are correctly extracted from result
+        columns = result.keys()  # list of column names
+        latest_friday_df = pd.DataFrame(result.fetchall(), columns=columns)
     return latest_friday_df
 
 # Main dataframe to use for home.py 
@@ -217,108 +222,16 @@ artist_title_html = "<div style='margin-top: -10px;'>" + "<br>".join(artist_titl
 # Display the metric with the label and the empty value, then the HTML list
 with col1:
     # Display the metric with an empty value but with help text
-    st.metric(label=":grey[Highest Average Playlist Position]", value="", delta=f"Average Position: {min_avg_position}", help='Averages all positions across any new AU playlist additions.')
+    st.metric(label=":grey[Highest Average Playlist Position]", value="", delta=f"Average Position: {min_avg_position:.2f}", help='Averages all positions across any new AU playlist additions.')
     
     # Use markdown to display the artist-title pairs underneath the metric
     st.markdown(artist_title_html, unsafe_allow_html=True)
-    
+    st.write("") 
+    st.write("") 
+
+ 
 st.write("----")
 
-
-########################################################## 
-# TOP 5 HIGHEST REACH CHART
-########################################################## 
-
-# # Dsiclaimer for using Desktop to view the website
-# st.write(
-#     """
-#     <style>
-#         .my-text {
-#             font-size: 11px;
-#             font-family: monospace;
-#         }
-#     </style>
-#     <p class="my-text">Hover over chart to check playlist details</p>
-#     """,
-#     unsafe_allow_html=True,
-# )
-
-# # Use latest_friday_df from earlier in the code
-# top_artists_reach = latest_friday_df.groupby(['Artist', 'Title']).agg({
-#     'Followers': 'sum',
-#     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
-# })
-
-# # Sort the DataFrame based on 'Followers' while maintaining the whole DataFrame
-# sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
-
-# # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
-# results_with_playlist = sorted_top_artists_reach.head(5).copy()
-
-# # Join the playlist names with '<br>' to create a single string with line breaks
-# results_with_playlist['Playlists_str'] = results_with_playlist['Playlist'].apply(lambda x: '<br>'.join(x))
-
-# # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
-# results_with_playlist = results_with_playlist.reset_index()
-
-# # Calculate maximum value of 'total_followers' and add a larger buffer
-# max_value = results_with_playlist['Followers'].max()
-# buffer = max_value * 0.2  # adjust this buffer percentage as needed
-
-# # Create a color scale
-# color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
-
-# # Create a bar chart using Plotly Express
-# fig = px.bar(results_with_playlist, x='Artist', y='Followers',
-#              text='Followers',
-#              hover_data=['Title', 'Playlists_str'],  # Add 'Playlist_str' to hover data
-#              color='Followers',  # Assign color based on 'Followers' values
-#              color_continuous_scale=color_scale  # Use custom color scale
-#              )
-
-# # Hover template to include Artist/Title and Playlist information
-# fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>%{customdata[1]}')
-
-# # Display the exact number of followers on top of each bar and adjust other aesthetics
-# fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
-
-# fig.update_layout(
-#     xaxis_title="",
-#     yaxis_title="Total Reach",
-#     yaxis=dict(
-#         title='Total Playlist Reach',
-#         range=[0, max_value + buffer],  # Extend the range beyond the highest bar
-#         type='linear'
-#     ),
-#     xaxis_tickangle=-20,
-#     xaxis=dict(automargin=True),
-#     plot_bgcolor='rgba(0,0,0,0)',  # Set background color to transparent
-#     paper_bgcolor='#0E1117',  # Set the overall figure background color
-#     margin=dict(t=80, l=40, r=40, b=40),  # Adjust margin to make sure title fits
-#     title=dict(
-#         text='Top 5 Highest Reach',
-#         font=dict(
-#             family="Arial, sans-serif",
-#             size=18,
-#             color="white"
-#         ),
-#         y=0.9,  # Position title within the top margin of the plotting area
-#         x=0.5,  # Center the title on the x-axis
-#         xanchor='center',
-#         yanchor='top'
-#     ),
-#     coloraxis_showscale=False
-# )
-
-# fig.update_traces(texttemplate='%{text:.3s}', textposition='outside')
-# fig.update_layout(
-#     uniformtext_minsize=8,
-#     uniformtext_mode='hide',
-#     showlegend=False  # hide the legend 
-# )
-
-# # Display the figure in Streamlit
-# st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 ########################################################## 
 # TOP 5 HIGHEST REACH CHART
@@ -438,11 +351,15 @@ latest_friday_df['Artist_Title'] = latest_friday_df.apply(lambda row: f"{row['Ar
 # Now filter the original DataFrame based on selection, this time it includes 'Artist_Title'
 filtered_df = latest_friday_df[latest_friday_df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
 
-# Continue with sorting and displaying the data as before
+# Ensure 'Followers' is numeric for proper sorting
+filtered_df['Followers'] = pd.to_numeric(filtered_df['Followers'], errors='coerce')
+
+# Continue with sorting and displaying the data 
 ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 
-# Before displaying, round 'Followers' to no decimal places and format
-ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{round(x):,}" if pd.notnull(x) else "N/A")
+#### By removing this line, ordered_filtered_df['Followers'] remains in a numeric format, which should allow Streamlit to handle sorting properly when you click on the column headers in the displayed DataFrame.
+# # Before displaying, round 'Followers' to no decimal places and format
+# ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{round(x):,}" if pd.notnull(x) else "N/A")
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)

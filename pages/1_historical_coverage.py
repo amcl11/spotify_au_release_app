@@ -1,8 +1,8 @@
 import streamlit as st
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import psycopg2
-import pandas as pd
+import pandas as pd 
 from datetime import datetime
 import plotly.express as px
 
@@ -12,29 +12,67 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 engine = create_engine(DATABASE_URL)
 
-# Function to fetch unique dates from the database
+#####debugging#####
+# Function to Fetch Unique Dates from the Database
 @st.cache_data(ttl=3500, show_spinner='Fetching available dates...')
 def fetch_unique_dates():
-    query = "SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC"
-    unique_dates_df = pd.read_sql_query(query, engine)
-
-    # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
-    # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
-    unique_dates_df['Date'] = pd.to_datetime(unique_dates_df['Date'], format='%Y-%m-%d', errors='coerce')
+    query = text("SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC")
+    with engine.connect() as conn:
+        result = conn.execute(query)
+        unique_dates_df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
+        # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
+        unique_dates_df['Date'] = pd.to_datetime(unique_dates_df['Date'], format='%Y-%m-%d', errors='coerce')
     
-    # Filter out any rows where the date could not be parsed
-    unique_dates_df = unique_dates_df.dropna(subset=['Date'])
+        # Filter out any rows where the date could not be parsed
+        unique_dates_df = unique_dates_df.dropna(subset=['Date'])
 
-    # Convert dates to a more readable string format for display
-    return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
+        # Convert dates to a more readable string format for display
+        return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
+##############################
 
-# Function to load database data based on selected date
-# @st.cache_data - this was hingering updated triple j adds on Monday 
+
+# # Function to fetch unique dates from the database
+# @st.cache_data(ttl=3500, show_spinner='Fetching available dates...')
+# def fetch_unique_dates():
+#     query = text("SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC")
+#     with engine.connect() as conn:
+#         unique_dates_df = pd.read_sql_query(query, conn)
+
+#     # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
+#     # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
+#     unique_dates_df['Date'] = pd.to_datetime(unique_dates_df['Date'], format='%Y-%m-%d', errors='coerce')
+    
+#     # Filter out any rows where the date could not be parsed
+#     unique_dates_df = unique_dates_df.dropna(subset=['Date'])
+
+#     # Convert dates to a more readable string format for display
+#     return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
+
+###########################################################################previous code###
+
+# # Function to load database data based on selected date
+# @st.cache_data(ttl=3500, show_spinner='Loading data...')
+# def load_db(selected_date_for_sql):
+#     # Use a named parameter in your query with :name syntax
+#     query = text("SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = :date")
+#     # Pass params as a dictionary with 'date' as the key
+#     database_df = pd.read_sql_query(query, engine, params={'date': selected_date_for_sql})
+#     return database_df
+
+
+### debugging###
+# Adjusted Function to Load Database Data Based on Selected Date
 @st.cache_data(ttl=3500, show_spinner='Loading data...')
 def load_db(selected_date_for_sql):
-    query = "SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = %s"
-    database_df = pd.read_sql_query(query, engine, params=(selected_date_for_sql,))
+    query = text("SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = :date")
+    with engine.connect() as connection:
+        result = connection.execute(query, {'date': selected_date_for_sql})
+        columns = result.keys()
+        database_df = pd.DataFrame(result.fetchall(), columns=columns)
     return database_df
+###############################
+
 
 st.subheader('Explore past release coverage:')
 
@@ -160,7 +198,6 @@ with col2:
     st.markdown(artist_names_html, unsafe_allow_html=True)
 
     col2.write("")
-    col2.write("")
 
 # ####################################
 # # HIGHEST AVERAGE PLAYLIST POSITION 
@@ -189,7 +226,7 @@ else:
 # Display the metric
 with col2:
     label = ":grey[Highest Average Playlist Position]"
-    st.metric(label=label, value="", delta=f"Average Position: {min_avg_position}")
+    st.metric(label=label, value="", delta=f"Average Position: {min_avg_position:.2f}")
 
     # Use markdown to display artist names with reduced line spacing and smaller text
     col2.markdown(artist_names_html, unsafe_allow_html=True)
@@ -199,96 +236,6 @@ with col2:
 ########################################################## 
 
 st.write("---")
-# st.write(
-#     """
-#     <style>
-#         .my-text {
-#             font-size: 12px;
-#             font-family: monospace;
-#         }
-#     </style>
-#     <p class="my-text">Hover over chart to check playlist details</p>
-#     """,
-#     unsafe_allow_html=True,
-# )
-# # Use latest_friday_df from earlier in the code
-# top_artists_reach = df.groupby(['Artist', 'Title']).agg({
-#     'Followers': 'sum',
-#     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
-# })
-
-# # # Display the data for the most recent date
-# top_artists_reach = df.groupby(['Artist', 'Title']).agg({
-#     'Followers': 'sum',
-#     'Playlist': lambda x: list(x.unique())  # Creates a list of unique playlists for each artist
-# })
-
-# # Sort the DataFrame based on 'Followers' while maintaining the whole DataFrame
-# sorted_top_artists_reach = top_artists_reach.sort_values(by='Followers', ascending=False)
-
-# # Select the top 5 artists while keeping all columns ('Followers' and 'Playlist')
-# results_with_playlist = sorted_top_artists_reach.head(5).copy()
-
-# # Calculate the 'Playlist_str' values using an intermediate step
-# playlist_str_series = results_with_playlist['Playlist'].apply(lambda x: ', '.join(x))
-
-# # Assign the calculated series to the DataFrame explicitly
-# results_with_playlist['Playlist_str'] = playlist_str_series
-
-# # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
-# results_with_playlist = results_with_playlist.reset_index()
-
-# # Create colour scale
-# color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
-
-# # Create bar chart with Plotly Express
-# fig = px.bar(results_with_playlist, x='Artist', y='Followers',
-#              text='Followers',
-#              hover_data=['Title', 'Playlist_str'],  # Add 'Playlist_str' to hover data
-#              color='Followers',  # Assign color based on 'Followers' values
-#              color_continuous_scale=color_scale  # Use the custom color scale
-#              )
-
-# # Custom hover template to include Playlist information
-# # Update hovertemplate to include 'Title'
-# fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>Reach: %{y:,}<br>Playlists: %{customdata[1]}')
-
-# # Display the exact number of followers on top of each bar and adjust other aesthetics
-# fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
-
-# fig.update_layout(
-#     xaxis_title="",
-#     yaxis_title="Total Reach",
-#     yaxis=dict(type='linear'),
-#     xaxis_tickangle=-45,
-#     plot_bgcolor='rgba(0,0,0,0)',  # Set background color to transparent
-#     paper_bgcolor='#0E1117',  # Set the overall figure background color
-#     margin=dict(t=60, l=40, r=40, b=40),  # Adjust margin to make sure title fits
-#     title=dict(
-#         text='Top 5 Highest Reach',
-#         font=dict(
-#             family="Arial, sans-serif",
-#             size=18,
-#             color="white"
-#         ),
-#         y=0.9,  # Position title within the top margin of the plotting area
-#         x=0.5,  # Center the title on the x-axis
-#         xanchor='center',
-#         yanchor='top'
-#     ),
-#     coloraxis_showscale=False
-# )
-
-# fig.update_traces(texttemplate='%{text:.3s}', textposition='inside')
-# fig.update_layout(
-#     uniformtext_minsize=8,
-#     uniformtext_mode='hide',
-#     showlegend=False  # Optionally hide the legend if not needed
-# )
-
-# # Display the figure in Streamlit
-# st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
 st.write(
     """
     <style>
@@ -398,11 +345,15 @@ df['Artist_Title'] = df.apply(lambda row: f"{row['Artist']} - {row['Title']}" if
 # Now filter the original DataFrame based on selection, this time it includes 'Artist_Title'
 filtered_df = df[df['Artist_Title'] == selected_artist_title].drop(columns=['Artist', 'Title', 'Artist_Title'])
 
-# Continue with sorting and displaying the data as before
+# Ensure 'Followers' is numeric for proper sorting
+filtered_df['Followers'] = pd.to_numeric(filtered_df['Followers'], errors='coerce')
+
+# Continue with sorting and displaying the data 
 ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 
-# Convert 'Followers' to integers to remove decimal points, then format as strings with commas
-ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].fillna(0).astype(int).apply(lambda x: f"{x:,}")
+#### By removing this line, ordered_filtered_df['Followers'] remains in a numeric format, which should allow Streamlit to handle sorting properly when you click on the column headers in the displayed DataFrame.
+# # Before displaying, round 'Followers' to no decimal places and format
+# ordered_filtered_df['Followers'] = ordered_filtered_df['Followers'].apply(lambda x: f"{round(x):,}" if pd.notnull(x) else "N/A")
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
@@ -442,17 +393,27 @@ else:
         hide_index=True
     )
 
-######### NEW GRAPH FEATURE - TOP PERFORMERS ######
+##################
+# TOP PERFORMERS
+##################
 st.write("-----")
 st.subheader("Top Performers:")
 st.write('Comparing the weekly top performing release (by reach) across the available weeks (23rd Feb onwards).')
 
 # Define the caching function
+from sqlalchemy import text
+
 @st.cache_data(ttl=3500, show_spinner="Fetching Top Performers...") #cache for 3 days 
 def get_data(sql, _engine):
-    return pd.read_sql(sql, _engine)
+    # Convert SQL query to a text object
+    query = text(sql)
+    with _engine.connect() as connection:
+        result = connection.execute(query)
+        # Manually construct the DataFrame from the result set
+        data_df = pd.DataFrame(result.fetchall(), columns=result.keys())
+    return data_df
 
-# SQL query
+# SQL query remains the same
 sql_query = """
 WITH TotalFollowers AS (
   SELECT    
@@ -477,10 +438,11 @@ SELECT "Date", "Artist", "Title", total_followers
 FROM RankedArtists
 WHERE rank = 1
 ORDER BY "Date";
-
 """
 
+# Using the refactored function to get the DataFrame
 df = get_data(sql_query, engine)
+
 
 df['Artist/Title'] = df['Artist'] + " - '" + df['Title'] + "'"
 df['Date'] = pd.to_datetime(df['Date'])
@@ -537,18 +499,6 @@ fig.update_layout(
     showlegend=False,
     coloraxis_showscale=False,  # This hides the color scale bar
 )
-
-# # Update the layout with the new y-axis range
-# fig.update_layout(
-#     yaxis=dict(
-#         title='Total Playlist Reach',
-#         range=[0, max_value + buffer]  # Set the range from 0 to max value plus buffer
-#     ),
-#     xaxis_tickangle=35,
-#     xaxis_title='',
-#     showlegend=False,
-#     coloraxis_showscale=False  # This hides the color scale bar
-# )
 
 # Display the plot, ensuring it takes up the full container width / removes display bar 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
