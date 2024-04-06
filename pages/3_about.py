@@ -80,34 +80,34 @@ st.write("")
 st.write("")
 
 
-# Display the input field and submit button
-st.write("If you'd like another playlist considered for tracking submit it's playlist ID below:")
+# # Display the input field and submit button
+# st.write("If you'd like another playlist considered for tracking submit it's playlist ID below:")
 
-st.markdown("""
-#### Submit a Spotify Playlist ID:
+# st.markdown("""
+# #### Submit a Spotify Playlist ID:
 
-1. In Spotify, navigate to the playlist you'd like to submit.
-2. Click the three dots (near the play and shuffle buttons) to open the options menu.
-3. Click **'Share'** from the dropdown menu.
-4. Select **'Copy link to playlist'** to copy the playlist URL.
-5. Paste the copied link into the submission box below.
-""")
+# 1. In Spotify, navigate to the playlist you'd like to submit.
+# 2. Click the three dots (near the play and shuffle buttons) to open the options menu.
+# 3. Click **'Share'** from the dropdown menu.
+# 4. Select **'Copy link to playlist'** to copy the playlist URL.
+# 5. Paste the copied link into the submission box below.
+# """)
 
-playlist_link = st.text_input("Paste Spotify playlist link here:")
-submit_button = st.button("Submit")
+# playlist_link = st.text_input("Paste Spotify playlist link here:")
+# submit_button = st.button("Submit")
 
-if submit_button:
-    if playlist_link and is_valid_spotify_link(playlist_link):
+# if submit_button:
+#     if playlist_link and is_valid_spotify_link(playlist_link):
         
-        # Extracting the playlist ID from the link
-        playlist_id = re.search(r'playlist/([a-zA-Z0-9]{22})', playlist_link).group(1)
+#         # Extracting the playlist ID from the link
+#         playlist_id = re.search(r'playlist/([a-zA-Z0-9]{22})', playlist_link).group(1)
         
-        # Save the extracted playlist ID
-        save_user_input(playlist_id)
+#         # Save the extracted playlist ID
+#         save_user_input(playlist_id)
         
-        st.success("Submission received.")
-    else:
-        st.error("Please submit a valid Spotify playlist link.")
+#         st.success("Submission received.")
+#     else:
+#         st.error("Please submit a valid Spotify playlist link.")
         
 
 st.write("-----")
