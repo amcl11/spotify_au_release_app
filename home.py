@@ -87,7 +87,7 @@ st.subheader(most_recent_friday_str)
 # MAIN FUNCTION TO LOAD LATEST FRIDAY DATA FOR HOME.PY - Cached for 58.33 mins (ttl=3500) 
 ############################################################################################
 
-@st.cache_data(ttl=3500, show_spinner='Fetching New Releases...')
+@st.cache_data(ttl=350, show_spinner='Fetching New Releases...')
 def load_db_for_most_recent_date():
     query = text("""
     SELECT * FROM nmf_spotify_coverage
@@ -161,7 +161,7 @@ if not filtered_df.empty and pd.notna(filtered_df['Image_URL'].iloc[0]):
         if todays_cover_image:
             col2.image(todays_cover_image)
         else:
-            col2.write("Failed to load image from URL.")
+            col2.image("Failed to load image from URL.")
     else:
         col2.write("No cover image available this week.")
 else:
