@@ -6,6 +6,11 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px
 
+from PIL import Image
+import requests
+from io import BytesIO
+import streamlit as st
+
 # Setup DATABASE_URL and engine
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
@@ -88,6 +93,20 @@ selected_date_for_sql = datetime.strptime(selected_date_format, "%A %d %B %Y").s
 # Load data for the selected date
 df = load_db(selected_date_for_sql)
 
+# Function to load image from URL
+def load_image_from_url(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            image = Image.open(BytesIO(response.content))
+            return image
+        else:
+            return None
+    except Exception as e:
+        print(f"Error loading image: {e}")
+        return None
+
+
 # Filter dataframe to get the row with the "New Music Friday AU & NZ" playlist
 nmf_image_series = df[df['Playlist'] == "New Music Friday AU & NZ"]['Image_URL']
 
@@ -97,7 +116,14 @@ nmf_image_url = nmf_image_series.iloc[0] if not nmf_image_series.empty else None
 col1, col2 = st.columns([3, 4])
 # Display the image with a specific width
 with col1:
-    st.image(nmf_image_url, width=300)
+    if nmf_image_url:
+        todays_cover_image = load_image_from_url(nmf_image_url)
+        if todays_cover_image:
+            st.image(todays_cover_image, width=300)
+        else:
+            st.write("Failed to load image from URL.")
+    else:
+        st.write("Current NMF image not available")
     
 st.markdown(
     """
