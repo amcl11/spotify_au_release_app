@@ -8,6 +8,11 @@ import plotly.express as px
 from sqlalchemy import create_engine, text
 import os
 
+from PIL import Image
+import requests
+from io import BytesIO
+import streamlit as st
+
 # Set right aligned note about Desktop viewing 
 col1, col2, col3 = st.columns([6, 6, 6])
 
@@ -127,12 +132,43 @@ st.markdown(
 # Filter the DataFrame to get rows matching the NMF playlist
 filtered_df = latest_friday_df[latest_friday_df['Playlist'] == "New Music Friday AU & NZ"]
 
-# Ensure the filtered DataFrame is not empty before extracting the Image_URL
-if not filtered_df.empty:
-    todays_cover_image = filtered_df['Image_URL'].iloc[0]  
-    col2.image(todays_cover_image)
+# # Ensure the filtered DataFrame is not empty before extracting the Image_URL
+# if not filtered_df.empty:
+#     todays_cover_image = filtered_df['Image_URL'].iloc[0]  
+#     col2.image(todays_cover_image)
+# else:
+#     col2.write("Issues displaying current NMF image.")
+
+#debugging
+# Function to load image from URL
+def load_image_from_url(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            image = Image.open(BytesIO(response.content))
+            return image
+        else:
+            return None
+    except Exception as e:
+        print(f"Error loading image: {e}")
+        return None
+
+# Ensure the filtered DataFrame is not empty and the Image_URL is not null before extracting the Image URL
+if not filtered_df.empty and pd.notna(filtered_df['Image_URL'].iloc[0]):
+    image_url = filtered_df['Image_URL'].iloc[0]
+    if image_url:  # Check if the URL is not empty
+        todays_cover_image = load_image_from_url(image_url)
+        if todays_cover_image:
+            col2.image(todays_cover_image)
+        else:
+            col2.write("Failed to load image from URL.")
+    else:
+        col2.write("No cover image available this week.")
 else:
-    col2.write("Issues displaying current NMF image.")
+    col2.write("Current NMF image not available.")
+#Debugging
+
+
 
 #######################
 # HIGHEST REACH METRIC 
