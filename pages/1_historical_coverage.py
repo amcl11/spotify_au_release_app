@@ -17,7 +17,6 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 engine = create_engine(DATABASE_URL)
 
-#####debugging#####
 # Function to Fetch Unique Dates from the Database
 @st.cache_data(ttl=3500, show_spinner='Fetching available dates...')
 def fetch_unique_dates():
@@ -34,39 +33,8 @@ def fetch_unique_dates():
 
         # Convert dates to a more readable string format for display
         return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
-##############################
 
 
-# # Function to fetch unique dates from the database
-# @st.cache_data(ttl=3500, show_spinner='Fetching available dates...')
-# def fetch_unique_dates():
-#     query = text("SELECT DISTINCT \"Date\" FROM nmf_spotify_coverage ORDER BY \"Date\" DESC")
-#     with engine.connect() as conn:
-#         unique_dates_df = pd.read_sql_query(query, conn)
-
-#     # Convert the 'Date' column to datetime using the known format 'YYYY-MM-DD'
-#     # 'errors='coerce'' will handle any parsing errors by converting them to NaT, which can then be filtered out
-#     unique_dates_df['Date'] = pd.to_datetime(unique_dates_df['Date'], format='%Y-%m-%d', errors='coerce')
-    
-#     # Filter out any rows where the date could not be parsed
-#     unique_dates_df = unique_dates_df.dropna(subset=['Date'])
-
-#     # Convert dates to a more readable string format for display
-#     return unique_dates_df['Date'].dt.strftime("%A %d %B %Y").tolist()
-
-###########################################################################previous code###
-
-# # Function to load database data based on selected date
-# @st.cache_data(ttl=3500, show_spinner='Loading data...')
-# def load_db(selected_date_for_sql):
-#     # Use a named parameter in your query with :name syntax
-#     query = text("SELECT * FROM nmf_spotify_coverage WHERE \"Date\" = :date")
-#     # Pass params as a dictionary with 'date' as the key
-#     database_df = pd.read_sql_query(query, engine, params={'date': selected_date_for_sql})
-#     return database_df
-
-
-### debugging###
 # Adjusted Function to Load Database Data Based on Selected Date
 @st.cache_data(ttl=3500, show_spinner='Loading data...')
 def load_db(selected_date_for_sql):
@@ -76,8 +44,6 @@ def load_db(selected_date_for_sql):
         columns = result.keys()
         database_df = pd.DataFrame(result.fetchall(), columns=columns)
     return database_df
-###############################
-
 
 st.subheader('Explore past release coverage:')
 
@@ -293,6 +259,9 @@ results_with_playlist['Playlists_str'] = results_with_playlist['Playlist'].apply
 # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()
 
+# Combine 'Artist' and 'Title' into a unique identifier
+results_with_playlist['Artist_Title'] = results_with_playlist['Artist'] + ' - ' + results_with_playlist['Title']
+
 # Calculate maximum value of 'total_followers' and add a larger buffer
 max_value = results_with_playlist['Followers'].max()
 buffer = max_value * 0.2  # adjust this buffer percentage as needed
@@ -301,7 +270,7 @@ buffer = max_value * 0.2  # adjust this buffer percentage as needed
 color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
 
 # Create a bar chart using Plotly Express
-fig = px.bar(results_with_playlist, x='Artist', y='Followers',
+fig = px.bar(results_with_playlist, x='Artist_Title', y='Followers',
              text='Followers',
              hover_data=['Title', 'Playlists_str'],  # Add 'Playlist_str' to hover data
              color='Followers',  # Assign color based on 'Followers' values
@@ -309,7 +278,7 @@ fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              )
 
 # Custom hover template
-fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>%{customdata[1]}',
+fig.update_traces(hovertemplate='<b>%{x}</b> <br>%{customdata[1]}',
                   textposition='outside',
                   texttemplate='%{text:.3s}'
                   )
@@ -322,7 +291,7 @@ fig.update_layout(
         automargin=True,  # Let Plotly adjust the margin automatically
     ),
     xaxis=dict(
-        tickangle=-20,
+        tickangle=20,
         title = '',
         automargin=True,  # Let Plotly adjust the margin automatically
     ),

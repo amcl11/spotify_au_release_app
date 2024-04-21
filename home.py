@@ -304,6 +304,10 @@ results_with_playlist['Playlists_str'] = results_with_playlist['Playlist'].apply
 # Ensure 'Artist' is a column for Plotly (if 'Artist' was the index)
 results_with_playlist = results_with_playlist.reset_index()
 
+# Combine 'Artist' and 'Title' into a unique identifier
+results_with_playlist['Artist_Title'] = results_with_playlist['Artist'] + ' - ' + results_with_playlist['Title']
+
+
 # Calculate maximum value of 'total_followers' and add a larger buffer
 max_value = results_with_playlist['Followers'].max()
 buffer = max_value * 0.2  # adjust this buffer percentage as needed
@@ -312,7 +316,7 @@ buffer = max_value * 0.2  # adjust this buffer percentage as needed
 color_scale = [[0, 'lightsalmon'], [0.5, 'coral'], [1, 'orangered']]
 
 # Create a bar chart using Plotly Express
-fig = px.bar(results_with_playlist, x='Artist', y='Followers',
+fig = px.bar(results_with_playlist, x='Artist_Title', y='Followers',
              text='Followers',
              hover_data=['Title', 'Playlists_str'],  # Add 'Playlist_str' to hover data
              color='Followers',  # Assign color based on 'Followers' values
@@ -320,7 +324,7 @@ fig = px.bar(results_with_playlist, x='Artist', y='Followers',
              )
 
 # Custom hover template
-fig.update_traces(hovertemplate='<b>%{x}</b> - %{customdata[0]}<br>%{customdata[1]}',
+fig.update_traces(hovertemplate='<b>%{x}</b> <br>%{customdata[1]}',
                   textposition='outside',
                   texttemplate='%{text:.3s}'
                   )
@@ -333,7 +337,7 @@ fig.update_layout(
         automargin=True,  # Let Plotly adjust the margin automatically
     ),
     xaxis=dict(
-        tickangle=-20,
+        tickangle=20,
         title = '',
         automargin=True,  # Let Plotly adjust the margin automatically
     ),
