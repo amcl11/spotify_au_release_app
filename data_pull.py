@@ -68,7 +68,7 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=14, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='tue', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='tue', hour=18, minute=40))
-    scheduler.add_job(data_pull, CronTrigger(day_of_week='wed', hour=9, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='wed', hour=20, minute=47))
 
     try:
         scheduler.start()
@@ -111,22 +111,6 @@ def data_pull():
     track_positions = find_tracks_positions_in_playlists(sp, track_details, playlists_dict)
     print(f'Track positions in other playlists found for {len(track_positions)} tracks.')
     
-    ###########################################
-    ###########################################
-    ###########################################
-    # troubleshooting missing Get Popped! info...
-    # file_name = 'track_positions.json'
-
-    # try:
-    #     with open(file_name, 'w') as file:
-    #         json.dump(track_positions, file, indent=4)
-    #     print(f"Track positions successfully exported to {file_name}")
-    # except Exception as e:
-    #     print(f"Error exporting track positions: {e}")  
-    
-    ###########################################
-    ###########################################
-    ###########################################
     
     # Fetching playlist follower counts
     # Dictionary to store follower counts
@@ -293,14 +277,12 @@ def data_pull():
     logging.info(f"Upload date determined as: {upload_date}")
 
 
+### debugging
     with engine.connect() as conn:
         with conn.begin() as trans:
             try:
-                logging.info(f"Attempting to delete existing records for date {upload_date}.")
-                result = conn.execute(
-                text("""DELETE FROM public.nmf_spotify_coverage WHERE "Date" = :date"""),
-                date=upload_date)
-                
+                logging.info(f"Attempting to delete existing records for date {upload_date}.") 
+                result = conn.execute(text("""DELETE FROM public.nmf_spotify_coverage WHERE "Date" = :date"""), {'date': upload_date})
                 logging.info(f"Deleted {result.rowcount} existing records for date {upload_date}.")
                 logging.info("Inserting new data.")
                 # Ensure 'merged_df' has the correct 'Date' set to 'upload_date' before insertion
@@ -326,3 +308,4 @@ def data_pull():
 
 if __name__ == "__main__":
     schedule()
+

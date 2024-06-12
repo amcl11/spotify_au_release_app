@@ -74,6 +74,8 @@ with col3:
 - Coffee + Chill
 - Gentle Acoustic
 - triple j's New Music Hitlist
+- Local Hype
+- Local Noise  
     """)
 
 st.write("")
