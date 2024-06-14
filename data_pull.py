@@ -14,6 +14,34 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 import pytz
 
+
+def schedule():
+    print(f"Automated Data Pull executed at {datetime.now(pytz.timezone('Australia/Sydney'))}")
+    scheduler = BlockingScheduler(timezone="Australia/Sydney")
+
+    # Define scheduler timings
+    cron_timings = [
+        ('fri', [(0, 1), (0, 15), (0, 45), (0, 52), (1, 0), (1, 30), (2, 0), (2, 30), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0), (8, 0), (8, 15), (8, 45), (9, 0), (9, 30), (9, 55), (10, 0), (10, 10), (10, 15), (11, 0), (12, 30), (15, 0), (15, 1), (15, 4), (15, 8), (15, 9), (15, 20), (15, 30), (16, 0), (17, 0), (22, 0), (23, 19 )]),
+        ('sat', [(6, 0)]),
+        ('sun', [(6, 0)]),
+        ('mon', [(6, 0), (7, 0), (7, 30), (8, 0), (8, 30), (9, 0), (9, 15), (9, 30), (9, 45), (10, 0), (11, 0), (12, 0), (14, 0)]),
+        ('tue', [(6, 0), (18, 40)]),
+        ('wed', [(20, 47)])
+    ]
+
+    # Add jobs using loop
+    for day, times in cron_timings:
+        for hour, minute in times:
+            scheduler.add_job(data_pull, CronTrigger(day_of_week=day, hour=hour, minute=minute))
+
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
+
+
+
+'''
 def schedule():
     print(f"Automated Data Pull executed at {datetime.now(pytz.timezone('Australia/Sydney'))}")
     scheduler = BlockingScheduler(timezone="Australia/Sydney")
@@ -51,6 +79,7 @@ def schedule():
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=16, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=17, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=22, minute=0))
+    scheduler.add_job(data_pull, CronTrigger(day_of_week='fri', hour=22, minute=35))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='sat', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='sun', hour=6, minute=0))
     scheduler.add_job(data_pull, CronTrigger(day_of_week='mon', hour=6, minute=0))
@@ -74,6 +103,7 @@ def schedule():
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         pass
+'''
 
 def data_pull():
     # data pull logic and database upload below

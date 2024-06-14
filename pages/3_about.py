@@ -8,13 +8,16 @@ col1, col2, col3 = st.columns(3)
 # App Title
 st.title('New Music Playlist Tracker (AU)')
 st.write("""
-This site streamlines Friday morning playlist checking for those interested in New Release coverage on Spotify in Australia.
-    
-The process involves retrieving all songs that have been added to <span style='color: salmon;'>New Music Friday AU & NZ</span>. These songs are then reviewed to check whether they have also been added to key Australian editorial playlists. 
- 
-This means New Releases that did not get added to NMF AU & NZ (eg. additional album tracks, previous releases that have picked up new playlists additions etc) will not show up on this site - focusing on the brand new releases that Spotify has chosen to feature in NMF AU/NZ.
-    
-*Historical coverage is a snapshot of playlist adds between Friday (release) → Wednesday 9.00am AEST. 
+
+
+This site streamlines Friday morning playlist checking for those interested in new release coverage on Spotify in Australia.
+
+Songs that have been added to <span style='color: salmon;'>New Music Friday AU & NZ</span> are fetched and then checked against key Australian editorial playlists.
+
+This means new releases that did not get added to NMF AU & NZ (e.g., additional album tracks, previous releases that have picked up new playlist additions, etc.) will not show up on this site—focusing on the brand new releases that Spotify has chosen to feature in NMF AU/NZ.
+
+*Historical coverage is a snapshot of playlist additions between Friday (release) and Wednesday 9:00 AM AEST.
+
     
 """, unsafe_allow_html=True)
 
@@ -48,13 +51,14 @@ with col1:
 - Get Popped!
 - R&B Connect
 - The Flavour
+- Fresh Country
+- New Dance Beats
     """)
 
 with col2:
     st.markdown("""
 
-- Fresh Country
-- New Dance Beats
+
 - Pop n' Fresh
 - Beats n' Bars
 - Indie Arrivals
@@ -62,21 +66,28 @@ with col2:
 - Mellow Styles
 - The Drip
 - Alt Here
+- Breaking Hits
+- Chilled Hits
+- the hybrid
+
 
     """)
 
 with col3:
     st.markdown("""
 
-- Breaking Hits
-- Chilled Hits
-- the hybrid
 - Coffee + Chill
 - Gentle Acoustic
 - triple j's New Music Hitlist
 - Local Hype
-- Local Noise  
-    """)
+- Local Noise 
+- Long Live DnB
+- Blak Australia  
+- Homegrown + Heavy 
+- Big Ancestry Energy
+- Proppa Bars
+- Afro Fusion
+""")
 
 st.write("")
 st.write("")
