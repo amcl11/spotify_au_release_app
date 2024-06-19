@@ -12,7 +12,7 @@ st.write("""
 
 This site streamlines Friday morning playlist checking for those interested in new release coverage on Spotify in Australia.
 
-Songs that have been added to <span style='color: salmon;'>New Music Friday AU & NZ</span> are fetched and then checked against key Australian editorial playlists.
+Songs that have been added to <span style='color: salmon;'>New Music Friday AU & NZ</span> are fetched and then checked against key editorial playlists.
 
 This means new releases that did not get added to NMF AU & NZ (e.g., additional album tracks, previous releases that have picked up new playlist additions, etc.) will not show up on this site—focusing on the brand new releases that Spotify has chosen to feature in NMF AU/NZ.
 
@@ -53,13 +53,14 @@ with col1:
 - The Flavour
 - Fresh Country
 - New Dance Beats
+- Pop n' Fresh
     """)
 
 with col2:
     st.markdown("""
 
 
-- Pop n' Fresh
+
 - Beats n' Bars
 - Indie Arrivals
 - Rock Out.
@@ -69,6 +70,8 @@ with col2:
 - Breaking Hits
 - Chilled Hits
 - the hybrid
+- Coffee + Chill
+- Gentle Acoustic
 
 
     """)
@@ -76,8 +79,7 @@ with col2:
 with col3:
     st.markdown("""
 
-- Coffee + Chill
-- Gentle Acoustic
+
 - triple j's New Music Hitlist
 - Local Hype
 - Local Noise 
@@ -86,6 +88,7 @@ with col3:
 - Homegrown + Heavy 
 - Big Ancestry Energy
 - Proppa Bars
+- On One
 - Afro Fusion
 """)
 

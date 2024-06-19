@@ -18,7 +18,7 @@ st.markdown(
     '<p style="font-size: 14px;">This site only tracks releases that were added to NMF AU & NZ</p>', 
     unsafe_allow_html=True
 )
-st.write("Update: Local Hype and Local Noise playlists added 7th June 2024. If a track was added to either of those prior to 7th June it won't show up in the comparison.")
+st.write("Note: New playlists have been added on 7th June 2024. If a track was added to any of the newly tracked playlists prior to 7th June it won't show up in the comparison.")
 st.write('--------------')
 
 

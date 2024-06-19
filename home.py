@@ -258,7 +258,7 @@ artist_title_html = "<div style='margin-top: -10px;'>" + "<br>".join(artist_titl
 # Display the metric with the label and the empty value, then the HTML list
 with col1:
     # Display the metric with an empty value but with help text
-    st.metric(label=":grey[Highest Average Playlist Position]", value="", delta=f"Average Position: {min_avg_position:.2f}", help='Averages all positions across any new AU playlist additions.')
+    st.metric(label=":grey[Highest Average Playlist Position]", value="", delta=f"Average Position: {min_avg_position:.1f}", help='Averages all positions across any new AU playlist additions.')
     
     # Use markdown to display the artist-title pairs underneath the metric
     st.markdown(artist_title_html, unsafe_allow_html=True)
