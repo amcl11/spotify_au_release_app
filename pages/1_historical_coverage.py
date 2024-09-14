@@ -392,13 +392,12 @@ else:
 # TOP PERFORMERS
 ##################
 st.write("-----")
-st.subheader("Top Performers:")
-st.write('Comparing the weekly top performing release (by reach) across the available weeks (23rd Feb onwards).')
+st.subheader("Top 10 Performers:")
+st.write('Top weekly performers (by reach) across the available weeks (23.02.2024 onwards).')
 
-# Define the caching function
 from sqlalchemy import text
 
-@st.cache_data(ttl=3500, show_spinner="Fetching Top Performers...") #cache for 3 days 
+@st.cache_data(ttl=3500, show_spinner="Fetching Top Performers...") # cache for 3 days 
 def get_data(sql, _engine):
     # Convert SQL query to a text object
     query = text(sql)
@@ -408,37 +407,55 @@ def get_data(sql, _engine):
         data_df = pd.DataFrame(result.fetchall(), columns=result.keys())
     return data_df
 
-# SQL query remains the same
+# Updated SQL query
 sql_query = """
 WITH TotalFollowers AS (
   SELECT    
     "Date",
     "Artist",
     "Title",
+    STRING_AGG(DISTINCT "Playlist", E'\n') AS playlists,
     SUM("Followers") AS total_followers
   FROM nmf_spotify_coverage
   WHERE "Artist" IS NOT NULL AND "Title" IS NOT NULL AND "Followers" IS NOT NULL
   GROUP BY "Date", "Artist", "Title"
 ),
-RankedArtists AS (
+RankedArtistsPerWeek AS (
   SELECT
     "Date",
     "Artist",
     "Title",
+    playlists,
     total_followers,
-    RANK() OVER (PARTITION BY "Date" ORDER BY total_followers DESC) as rank
+    RANK() OVER (PARTITION BY "Date" ORDER BY total_followers DESC) AS rank_within_week
   FROM TotalFollowers
+),
+TopPerformersPerWeek AS (
+  SELECT
+    "Date",
+    "Artist",
+    "Title",
+    playlists,
+    total_followers
+  FROM RankedArtistsPerWeek
+  WHERE rank_within_week = 1
+),
+RankedTopPerformers AS (
+  SELECT
+    *,
+    RANK() OVER (ORDER BY total_followers DESC) AS overall_rank
+  FROM TopPerformersPerWeek
 )
-SELECT "Date", "Artist", "Title", total_followers
-FROM RankedArtists
-WHERE rank = 1
-ORDER BY "Date";
+SELECT "Date", "Artist", "Title", playlists, total_followers
+FROM RankedTopPerformers
+WHERE overall_rank <= 10
+ORDER BY total_followers DESC;
 """
 
-# Using the refactored function to get the DataFrame
+# retreive DataFrame from SQL query 
 df = get_data(sql_query, engine)
 
-
+# Data preparation
 df['Artist/Title'] = df['Artist'] + " - '" + df['Title'] + "'"
 df['Date'] = pd.to_datetime(df['Date'])
 df['formatted_followers'] = (df['total_followers'] / 1e6).map("{:.2f}m".format)
@@ -446,7 +463,7 @@ df['formatted_followers'] = (df['total_followers'] / 1e6).map("{:.2f}m".format)
 # Sort dataframe in descending order by 'total_followers'
 df_sorted = df.sort_values(by='total_followers', ascending=False)
 
-# Function to apply custom date formatting with suffix for the day
+# Custom date formatting functions
 def custom_date_format(date):
     day = date.day
     day_with_suffix = f"{day}{suffix(day)}"
@@ -454,53 +471,59 @@ def custom_date_format(date):
     return formatted_date
 
 def suffix(d):
-    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+    return 'th' if 11 <= d <= 13 else {1:'st', 2:'nd', 3:'rd'}.get(d % 10, 'th')
 
-# Apply the custom date formatting function to your date column
+# Apply custom date formatting
 df_sorted['formatted_date'] = df_sorted['Date'].apply(custom_date_format)
 
-# Define a custom color scale with more subtle changes
-# The numbers represent the relative positions of each color from 0 (start) to 1 (end)
+# Process the 'playlists' column to create a string for hover text
+df_sorted['playlists_str'] = df_sorted['playlists'].str.replace('\n', '<br>')
+
+# Define the custom color scale with more subtle changes
 custom_color_scale = [
     (0, 'rgb(230, 240, 255)'),  # Lighter blue
     (0.5, 'rgb(180, 210, 255)'),  # Medium blue
     (1, 'rgb(100, 150, 240)'),  # Darker blue
 ]
 
-# Plotting with 'Artist/Title' on x-axis and total followers on y-axis
-fig = px.bar(df_sorted, x='Artist/Title', y='total_followers', text='formatted_followers',
-             title='',
-             color='total_followers',
-             color_continuous_scale=custom_color_scale,  # Use the custom color scale
-             orientation='v',
-             hover_data={'total_followers': ':,', 'formatted_date': True})  # Use formatted date
+# Plotting the bar chart
+fig = px.bar(
+    df_sorted,
+    x='Artist/Title',
+    y='total_followers',
+    text='formatted_followers',
+    #title='Top 10 Performers Across All Weeks by Total Playlist Reach',
+    color='total_followers',
+    color_continuous_scale=custom_color_scale,
+    hover_data={'formatted_date': True, 'playlists_str': True},
+    labels={'total_followers': 'Total Playlist Reach', 'Artist/Title': 'Artist and Title'}
+)
 
-# Customize hover template to show 'Release Date' and move text above the bars
-fig.update_traces(hovertemplate='Release Date: %{customdata[0]}<extra></extra>',
-                  textposition='outside')
+# Customize hover template to include detailed information
+fig.update_traces(
+    hovertemplate=(
+        "<b>%{x}</b><br>"
+        "Total Reach: %{y:,}<br>"
+        "Date: %{customdata[0]}<br>"
+        "Playlists:<br>%{customdata[1]}<extra></extra>"
+    ),
+    textposition='outside'
+)
 
-# Calculate maximum value of 'total_followers' and add a buffer
-max_value = df_sorted['total_followers'].max()  
-buffer = max_value * 0.25  #buffer
-
+# Adjust y-axis range
+max_value = df_sorted['total_followers'].max()
 fig.update_layout(
     yaxis=dict(
         title='Total Playlist Reach',
-        # Define the range with a narrower lower bound or a higher upper bound
-        range=[-max_value * 0.05, max_value * 1.10],  # The negative lower bound can give more "room" at the bottom
+        range=[-max_value * 0.05, max_value * 1.10]
     ),
     xaxis_tickangle=30,
     xaxis_title='',
     showlegend=False,
-    coloraxis_showscale=False,  # This hides the color scale bar
+    coloraxis_showscale=False  # Hide the color scale bar
 )
 
-# Display the plot, ensuring it takes up the full container width / removes display bar 
-st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
-
-
-
-    
+# Display the plot
+st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})  
 
 

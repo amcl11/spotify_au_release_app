@@ -132,14 +132,6 @@ st.markdown(
 # Filter the DataFrame to get rows matching the NMF playlist
 filtered_df = latest_friday_df[latest_friday_df['Playlist'] == "New Music Friday AU & NZ"]
 
-# # Ensure the filtered DataFrame is not empty before extracting the Image_URL
-# if not filtered_df.empty:
-#     todays_cover_image = filtered_df['Image_URL'].iloc[0]  
-#     col2.image(todays_cover_image)
-# else:
-#     col2.write("Issues displaying current NMF image.")
-
-#debugging
 # Function to load image from URL
 def load_image_from_url(url):
     try:
@@ -153,20 +145,56 @@ def load_image_from_url(url):
         print(f"Error loading image: {e}")
         return None
 
+# Filter the DataFrame to get rows matching the NMF playlist
+filtered_df = latest_friday_df[latest_friday_df['Playlist'] == "New Music Friday AU & NZ"]
+
 # Ensure the filtered DataFrame is not empty and the Image_URL is not null before extracting the Image URL
 if not filtered_df.empty and pd.notna(filtered_df['Image_URL'].iloc[0]):
     image_url = filtered_df['Image_URL'].iloc[0]
+    cover_artist = filtered_df['Cover_Artist'].iloc[0] if 'Cover_Artist' in filtered_df.columns and pd.notna(filtered_df['Cover_Artist'].iloc[0]) else None
+
     if image_url:  # Check if the URL is not empty
         todays_cover_image = load_image_from_url(image_url)
         if todays_cover_image:
-            col2.image(todays_cover_image)
+            if cover_artist:
+                col2.image(image_url, caption=f"Cover Artist: {cover_artist}", width=300)
+            else:
+                col2.image(image_url, width=300)
+                col2.write("Cover Artist not available.")
         else:
-            col2.image("Failed to load image from URL.")
+            col2.write("Failed to load image from URL.")
     else:
         col2.write("No cover image available this week.")
 else:
     col2.write("Current NMF image not available.")
-#Debugging
+
+
+# # Function to load image from URL
+# def load_image_from_url(url):
+#     try:
+#         response = requests.get(url)
+#         if response.status_code == 200:
+#             image = Image.open(BytesIO(response.content))
+#             return image
+#         else:
+#             return None
+#     except Exception as e:
+#         print(f"Error loading image: {e}")
+#         return None
+
+# # Ensure the filtered DataFrame is not empty and the Image_URL is not null before extracting the Image URL
+# if not filtered_df.empty and pd.notna(filtered_df['Image_URL'].iloc[0]):
+#     image_url = filtered_df['Image_URL'].iloc[0]
+#     if image_url:  # Check if the URL is not empty
+#         todays_cover_image = load_image_from_url(image_url)
+#         if todays_cover_image:
+#             col2.image(todays_cover_image)
+#         else:
+#             col2.image("Failed to load image from URL.")
+#     else:
+#         col2.write("No cover image available this week.")
+# else:
+#     col2.write("Current NMF image not available.")
 
 
 
@@ -361,8 +389,6 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 
-
-
 ########################
 # SEARCH ADDS BY SONG
 ########################
@@ -403,6 +429,7 @@ ordered_filtered_df = filtered_df.sort_values(by='Followers', ascending=False)
 
 # Display the table with only the 'Playlist', 'Position', and 'Followers' columns, ordered by 'Followers'
 st.dataframe(ordered_filtered_df[['Playlist', 'Position', 'Followers']], use_container_width=False, hide_index=True)
+
 
 ###########################
 # SEARCH ADDS BY PLAYLIST
@@ -502,7 +529,6 @@ for index, row in new_cover_artist_df.iterrows():
 
 st.write('- - - - - -') 
 
-
 ################################
 # ADDS BY PLAYLIST GRAPH
 ################################
@@ -545,7 +571,3 @@ for location in ['left', 'right', 'top', 'bottom']:
     ax.spines[location].set_visible(False)
 
 st.pyplot(fig)
-
-
-
-
