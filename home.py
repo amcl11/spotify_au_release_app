@@ -1,5 +1,6 @@
 # Dependencies 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
@@ -11,7 +12,7 @@ import os
 from PIL import Image
 import requests
 from io import BytesIO
-import streamlit as st
+
 
 # Set right aligned note about Desktop viewing 
 col1, col2, col3 = st.columns([6, 6, 6])
